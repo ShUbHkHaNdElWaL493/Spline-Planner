@@ -6,6 +6,7 @@
 
 #pragma once
 #include "spline_definitions.hpp"
+#include <vector>
 
 class CRSGenerator
 {

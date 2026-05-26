@@ -2,7 +2,7 @@
     Shubh Khandelwal
 */
 
-#include "../include/crs_generator.hpp"
+#include "crs_generator.hpp"
 #include <iostream>
 
 int main()
