@@ -2,11 +2,15 @@
     Shubh Khandelwal
 */
 
-// Dimension decided by user
-
 #pragma once
 #include <Eigen/Dense>
+#include <vector>
 
 #define EPSILON 1e-6
 
-typedef Eigen::RowVector3d Point;
+typedef Eigen::RowVectorXd SplineVector;
+
+struct SplineTrajectory
+{
+    std::vector<SplineVector> pos, vel, acc, jrk;
+};
