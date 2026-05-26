@@ -14,13 +14,16 @@ int main()
     p2 << 7, 8, 9;
     p3 << 10, 11, 12;
 
-    CRSGenerator crs_generator(50);
+    CRSGenerator crs_generator(50, 2, 1);
     std::vector<Point> path = crs_generator.getPath({p0, p1, p2, p3});
+    std::pair<double, double> result = crs_generator.getOptimalTime(path);
 
     for (size_t i = 0; i < path.size(); i++)
     {
         std::cout << path[i] << std::endl;
     }
+
+    std::cout << result.first << " " << result.second << std::endl;
 
     return 0;
 
