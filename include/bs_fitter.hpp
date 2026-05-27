@@ -17,17 +17,16 @@ class BSFitter
         SplineTrajectory interpolate(const SplineVector& p0, const SplineVector& p1, const SplineVector& p2, const SplineVector& p3) const
         {
         
-            Eigen::Matrix4Xd P(4, p0.size());
+            Eigen::Matrix4Xd P(4, p0.cols());
             P.row(0) = p0;
             P.row(1) = p1;
             P.row(2) = p2;
             P.row(3) = p3;
 
-            Eigen::MatrixXd pos, vel, acc, jrk;
-            pos = coef_pos * P;
-            vel = coef_vel * P;
-            acc = coef_acc * P;
-            jrk = coef_jrk * P;
+            Eigen::MatrixXd pos = coef_pos * P;
+            Eigen::MatrixXd vel = coef_vel * P;
+            Eigen::MatrixXd acc = coef_acc * P;
+            Eigen::MatrixXd jrk = coef_jrk * P;
 
             size_t vector_size = pos.rows();
             std::vector<SplineVector> pos_vector(vector_size), vel_vector(vector_size), acc_vector(vector_size), jrk_vector(vector_size);
@@ -43,7 +42,7 @@ class BSFitter
         
         }
 
-        std::pair<double, double> getOptimalTime(const std::vector<SplineVector>& path) const
+        std::pair<double, double> getOptimalKineticParameters(const std::vector<SplineVector>& path) const
         {
 
             double length_dense = 0.0;
@@ -61,7 +60,7 @@ class BSFitter
             double distance =  (4.0 * length_dense - length_sparse) / 3.0;
             double time = (distance / this->max_vel) + (this->max_vel / this->max_acc);
 
-            return {time, distance};
+            return {distance, time};
         
         }
     
@@ -79,39 +78,43 @@ class BSFitter
         {
 
             Eigen::Matrix4d basis_matrix;
-            basis_matrix.row(0) <<  1/6, 2/3,  1/6,   0;
-            basis_matrix.row(1) << -1/2,   0,  1/2,   0;
-            basis_matrix.row(2) <<  1/2,  -1,  1/2,   0;
-            basis_matrix.row(3) << -1/6, 1/2, -1/2, 1/6;
+            basis_matrix.row(0) <<  1.0/6.0,  2.0/3.0,  1.0/6.0,      0.0;
+            basis_matrix.row(1) << -1.0/2.0,      0.0,  1.0/2.0,      0.0;
+            basis_matrix.row(2) <<  1.0/2.0,     -1.0,  1.0/2.0,      0.0;
+            basis_matrix.row(3) << -1.0/6.0,  1.0/2.0, -1.0/2.0,  1.0/6.0;
 
-            Eigen::VectorXd t = Eigen::VectorXd::LinSpaced(this->resolution, 0.0, 1.0);
+            Eigen::VectorXd t = Eigen::VectorXd::LinSpaced(resolution, 0.0, 1.0);
             Eigen::VectorXd t2 = t.array().square(); 
             Eigen::VectorXd t3 = t.array().cube();
 
-            this->coef_pos.col(0).setOnes();
-            this->coef_pos.col(1) = t;
-            this->coef_pos.col(2) = t2;
-            this->coef_pos.col(3) = t3;
+            Eigen::MatrixX4d t_pos(resolution, 4);
+            t_pos.col(0).setOnes();
+            t_pos.col(1) = t;
+            t_pos.col(2) = t2;
+            t_pos.col(3) = t3;
 
-            this->coef_vel.col(0).setZero();
-            this->coef_vel.col(1).setOnes();
-            this->coef_vel.col(2) = 2.0 * t;
-            this->coef_vel.col(3) = 3.0 * t2;
+            Eigen::MatrixX4d t_vel(resolution, 4);
+            t_vel.col(0).setZero();
+            t_vel.col(1).setOnes();
+            t_vel.col(2) = 2.0 * t;
+            t_vel.col(3) = 3.0 * t2;
 
-            this->coef_acc.col(0).setZero();
-            this->coef_acc.col(1).setZero();
-            this->coef_acc.col(2).setConstant(2.0);
-            this->coef_acc.col(3) = 6.0 * t;
+            Eigen::MatrixX4d t_acc(resolution, 4);
+            t_acc.col(0).setZero();
+            t_acc.col(1).setZero();
+            t_acc.col(2).setConstant(2.0);
+            t_acc.col(3) = 6.0 * t;
 
-            this->coef_jrk.col(0).setZero();
-            this->coef_jrk.col(1).setZero();
-            this->coef_jrk.col(2).setZero();
-            this->coef_jrk.col(3).setConstant(6.0);
-
-            this->coef_pos = this->coef_pos * basis_matrix;
-            this->coef_vel = this->coef_vel * basis_matrix;
-            this->coef_acc = this->coef_acc * basis_matrix;
-            this->coef_jrk = this->coef_jrk * basis_matrix;
+            Eigen::MatrixX4d t_jrk(resolution, 4); 
+            t_jrk.col(0).setZero();
+            t_jrk.col(1).setZero();
+            t_jrk.col(2).setZero();
+            t_jrk.col(3).setConstant(6.0);
+            
+            this->coef_pos = t_pos * basis_matrix;
+            this->coef_vel = t_vel * basis_matrix;
+            this->coef_acc = t_acc * basis_matrix;
+            this->coef_jrk = t_jrk * basis_matrix;
 
         }
 
@@ -153,9 +156,15 @@ class BSFitter
 
         }
 
-        void evaluate(const double& total_time) const
+        void evaluate(const std::vector<SplineVector>& waypoints) const
         {
+
+            SplineTrajectory trajectory = this->fitSpline(waypoints);
+            std::pair<double, double> kinetic_parameters = this->getOptimalKineticParameters(trajectory.pos);
+            double total_distance = kinetic_parameters.first, total_time = kinetic_parameters.second;
+
             size_t num_steps = static_cast<size_t>(total_time * this->frequency);
+
         }
     
 };

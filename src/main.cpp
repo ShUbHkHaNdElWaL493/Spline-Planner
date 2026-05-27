@@ -5,6 +5,7 @@
 #include "crs_generator.hpp"
 #include "bs_fitter.hpp"
 #include <iostream>
+#include <fstream>
 
 int main()
 {
@@ -21,10 +22,12 @@ int main()
     BSFitter bs_fitter(500, 50, 2.0, 1.0);
     SplineTrajectory trajectory = bs_fitter.fitSpline(path);
 
-    for (size_t i = 0; i < trajectory.pos.size(); i++)
-    {
-        std::cout << trajectory.pos[i] << std::endl;
-    }
+    // std::ofstream file("points.txt");
+    // for (size_t i = 0; i < trajectory.pos.size(); i++)
+    // {
+    //     file << trajectory.pos[i] << std::endl;
+    // }
+    // file.close();
 
     return 0;
 

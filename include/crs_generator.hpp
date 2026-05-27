@@ -83,10 +83,10 @@ class CRSGenerator
                 std::vector<SplineVector> segment = this->interpolate(clean_waypoints[i], clean_waypoints[i + 1], clean_waypoints[i + 2], clean_waypoints[i + 3]);
                 if (i == clean_waypoints.size() - 4)
                 {
-                    path.insert(path.end(), segment.begin(), segment.end() - 1);
+                    path.insert(path.end(), segment.begin(), segment.end());
                 } else
                 {
-                    path.insert(path.end(), segment.begin(), segment.end());
+                    path.insert(path.end(), segment.begin(), segment.end() - 1);
                 }
             }
 
