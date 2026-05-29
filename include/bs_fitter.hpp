@@ -10,7 +10,6 @@ class BSFitter
 
     private:
 
-        double max_vel, max_acc;
         Eigen::MatrixX4d coef_pos, coef_vel, coef_acc, coef_jrk;
         size_t frequency, resolution;
         
@@ -41,34 +40,10 @@ class BSFitter
             return {pos_vector, vel_vector, acc_vector, jrk_vector};
         
         }
-
-        std::pair<double, double> getOptimalKineticParameters(const std::vector<SplineVector>& path) const
-        {
-
-            double length_dense = 0.0;
-            double length_sparse = 0.0;
-
-            for (size_t i = 1; i < path.size(); ++i)
-            {
-                length_dense += (path[i] - path[i - 1]).norm();
-                if (i % 2 == 0) 
-                {
-                    length_sparse += (path[i] - path[i - 2]).norm();
-                }
-            }
-
-            double distance =  (4.0 * length_dense - length_sparse) / 3.0;
-            double time = (distance / this->max_vel) + (this->max_vel / this->max_acc);
-
-            return {distance, time};
-        
-        }
     
     public:
 
-        BSFitter(const size_t& frequency, const size_t& resolution, const double& max_vel, const double& max_acc) :
-        max_vel(max_vel),
-        max_acc(max_acc),
+        BSFitter(const size_t& frequency, const size_t& resolution) :
         coef_pos(resolution, 4),
         coef_vel(resolution, 4),
         coef_acc(resolution, 4),
@@ -156,13 +131,10 @@ class BSFitter
 
         }
 
-        void evaluate(const std::vector<SplineVector>& waypoints) const
+        void evaluate(const std::vector<SplineVector>& waypoints, const double& total_time) const
         {
 
             SplineTrajectory trajectory = this->fitSpline(waypoints);
-            std::pair<double, double> kinetic_parameters = this->getOptimalKineticParameters(trajectory.pos);
-            double total_distance = kinetic_parameters.first, total_time = kinetic_parameters.second;
-
             size_t num_steps = static_cast<size_t>(total_time * this->frequency);
 
         }
