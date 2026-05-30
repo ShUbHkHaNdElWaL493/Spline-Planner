@@ -18,6 +18,7 @@ RUN add-apt-repository ppa:sdurobotics/ur-rtde -y \
     libboost-system-dev \
     libboost-thread-dev \
     libeigen3-dev \
+    libgsl-dev \
     librtde \
     librtde-dev \
     && rm -rf /var/lib/apt/lists/*

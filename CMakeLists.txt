@@ -1,15 +1,42 @@
 cmake_minimum_required(VERSION 3.10)
-project(SPLINE_PLANNER VERSION 1.0 LANGUAGES CXX)
+project(SPLINE_PLANNER LANGUAGES CXX Fortran)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+set(FORTRAN_SOURCES
+    fortran_src/curfit.f
+    fortran_src/fpback.f
+    fortran_src/fpbspl.f
+    fortran_src/fpchec.f
+    fortran_src/fpcurf.f
+    fortran_src/fpdisc.f
+    fortran_src/fpgivs.f
+    fortran_src/fpknot.f
+    fortran_src/fprati.f
+    fortran_src/fprota.f
+    fortran_src/splev.f
+)
+
 find_package(Eigen3 REQUIRED)
+find_package(GSL REQUIRED)
 find_package(ur_rtde REQUIRED)
 
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(
+    ${PROJECT_NAME}
+    ${CMAKE_SOURCE_DIR}/src/main.cpp
+    ${FORTRAN_SOURCES}
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_SOURCE_DIR}/include"
 )
 
-target_link_libraries(${PROJECT_NAME} Eigen3::Eigen ur_rtde::rtde)
+target_link_libraries(
+    ${PROJECT_NAME}
+    Eigen3::Eigen
+    gfortran
+    GSL::gsl
+    ur_rtde::rtde
+)

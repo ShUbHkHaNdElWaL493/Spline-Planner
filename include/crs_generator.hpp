@@ -14,14 +14,19 @@ class CRSGenerator
 
         size_t resolution;
 
+        static double getT(const double t, const SplineVector& p0, const SplineVector& p1)
+        {
+            double distance = (p1 - p0).norm();
+            return t + std::max(sqrt(distance), 0.001);
+        }
+
+        static double safeDt(const double dt)
+        {
+            return (std::abs(dt) < EPSILON) ? EPSILON : dt;
+        }
+
         std::vector<SplineVector> interpolate(const SplineVector& p0, const SplineVector& p1, const SplineVector& p2, const SplineVector& p3) const
         {
-
-            auto getT = [](const double& t, const SplineVector& p0, const SplineVector& p1)
-            {
-                double distance = (p1 - p0).norm();
-                return t + std::max(sqrt(distance), 0.001);
-            };
 
             double t0 = 0.0;
             double t1 = getT(t0, p0, p1);
@@ -29,11 +34,6 @@ class CRSGenerator
             double t3 = getT(t2, p2, p3);
 
             Eigen::VectorXd t = Eigen::VectorXd::LinSpaced(this->resolution, t1, t2);
-            
-            auto safeDt = [](double dt)
-            {
-                return (std::abs(dt) < EPSILON) ? EPSILON : dt;
-            };
 
             Eigen::MatrixXd A1 = ((t1 - t.array()) / safeDt(t1 - t0)).matrix() * p0 + ((t.array() - t0) / safeDt(t1 - t0)).matrix() * p1;
             Eigen::MatrixXd A2 = ((t2 - t.array()) / safeDt(t2 - t1)).matrix() * p1 + ((t.array() - t1) / safeDt(t2 - t1)).matrix() * p2;
@@ -59,14 +59,13 @@ class CRSGenerator
     
     public:
 
-        CRSGenerator(const size_t& resolution) : resolution(resolution)
+        CRSGenerator(const size_t resolution) : resolution(resolution)
         {}
 
         std::vector<SplineVector> getPath(const std::vector<SplineVector>& waypoints) const
         {
 
             std::vector<SplineVector> clean_waypoints;
-            clean_waypoints.push_back(waypoints[0]);
             clean_waypoints.push_back(waypoints[0]);
             for (size_t i = 1; i < waypoints.size(); i++)
             {
@@ -75,13 +74,17 @@ class CRSGenerator
                     clean_waypoints.push_back(waypoints[i]);
                 }
             }
-            clean_waypoints.push_back(waypoints[waypoints.size() - 1]);
+
+            std::vector<SplineVector> points;
+            points.push_back(clean_waypoints[0]);
+            points.insert(points.end(), clean_waypoints.begin(), clean_waypoints.end());
+            points.push_back(clean_waypoints.back());
 
             std::vector<SplineVector> path;
-            for (size_t i = 0; i < clean_waypoints.size() - 3; i++)
+            for (size_t i = 0; i < points.size() - 3; i++)
             {
-                std::vector<SplineVector> segment = this->interpolate(clean_waypoints[i], clean_waypoints[i + 1], clean_waypoints[i + 2], clean_waypoints[i + 3]);
-                if (i == clean_waypoints.size() - 4)
+                std::vector<SplineVector> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
+                if (i == points.size() - 4)
                 {
                     path.insert(path.end(), segment.begin(), segment.end());
                 } else
