@@ -7,6 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 set(FORTRAN_SOURCES
     fortran_src/curfit.f
+    fortran_src/fpader.f
     fortran_src/fpback.f
     fortran_src/fpbspl.f
     fortran_src/fpchec.f
@@ -16,6 +17,7 @@ set(FORTRAN_SOURCES
     fortran_src/fpknot.f
     fortran_src/fprati.f
     fortran_src/fprota.f
+    fortran_src/spalde.f
     fortran_src/splev.f
 )
 
