@@ -8,9 +8,14 @@
 
 #define EPSILON 1e-6
 
-typedef Eigen::RowVectorXd SplineVector;
-
-struct SplineTrajectory
+namespace splplanner
 {
-    std::vector<SplineVector> pos, vel, acc, jrk;
-};
+
+    typedef Eigen::RowVectorXd SplineVector;
+
+    struct SplineTrajectory
+    {
+        std::vector<SplineVector> pos, vel, acc, jrk;
+    };
+
+}

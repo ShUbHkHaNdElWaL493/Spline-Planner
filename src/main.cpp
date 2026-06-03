@@ -2,7 +2,7 @@
     Shubh Khandelwal
 */
 
-#include "bs_fitter.hpp"
+#include "spline_definitions.hpp"
 #include "crs_generator.hpp"
 #include "time_optimizer.hpp"
 #include <iostream>
@@ -11,16 +11,16 @@
 int main()
 {
 
-    SplineVector p0(3), p1(3), p2(3), p3(3);
+    splplanner::SplineVector p0(3), p1(3), p2(3), p3(3);
     p0 << 1, 2, 3;
     p1 << 4, 5, 6;
     p2 << 7, 8, 9;
     p3 << 10, 11, 12;
 
-    TimeOptimizer time_optimizer(2.0, 1.0);
+    splplanner::TimeOptimizer time_optimizer(2.0, 1.0);
 
-    CRSGenerator crs_generator(50);
-    std::vector<SplineVector> path = crs_generator.getPath({p0, p1, p2, p3});
+    splplanner::CRSGenerator crs_generator(50);
+    std::vector<splplanner::SplineVector> path = crs_generator.getPath({p0, p1, p2, p3});
     auto result1 = time_optimizer.getOptimalKineticParameters(path);
     std::cout << result1.first << " " << result1.second << std::endl;
 
