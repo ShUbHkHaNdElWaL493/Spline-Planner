@@ -2,14 +2,12 @@
     Shubh Khandelwal
 */
 
-// Accuracy parameter
-
 #pragma once
 #include "spline_definitions.hpp"
 
 namespace splplanner
 {
-    class CRSGenerator
+    class CRSFitter
     {
 
         private:
@@ -27,7 +25,12 @@ namespace splplanner
                 return (std::abs(dt) < EPSILON) ? EPSILON : dt;
             }
 
-            std::vector<VectorRepresentation> interpolate(const VectorRepresentation& p0, const VectorRepresentation& p1, const VectorRepresentation& p2, const VectorRepresentation& p3) const
+            std::vector<VectorRepresentation> interpolate(
+                const VectorRepresentation& p0,
+                const VectorRepresentation& p1,
+                const VectorRepresentation& p2,
+                const VectorRepresentation& p3
+            ) const
             {
 
                 double t0 = 0.0;
@@ -61,10 +64,10 @@ namespace splplanner
         
         public:
 
-            CRSGenerator(const size_t resolution) : resolution(resolution)
+            CRSFitter(const size_t resolution) : resolution(resolution)
             {}
 
-            std::vector<VectorRepresentation> getPath(const std::vector<VectorRepresentation>& waypoints) const
+            std::vector<VectorRepresentation> fitSpline(const std::vector<VectorRepresentation>& waypoints) const
             {
 
                 std::vector<VectorRepresentation> clean_waypoints;
