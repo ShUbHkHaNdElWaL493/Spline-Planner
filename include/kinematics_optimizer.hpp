@@ -2,13 +2,14 @@
     Shubh Khandelwal
 */
 
+#pragma once
 #include "fitpack.hpp"
 #include <gsl/gsl_integration.h>
 #include "spline_definitions.hpp"
 
 namespace splplanner
 {
-    class TimeOptimizer
+    class KinematicsOptimizer
     {
 
         private:
@@ -35,42 +36,17 @@ namespace splplanner
 
         public:
 
-            TimeOptimizer(const double max_vel, const double max_acc) : max_vel(max_vel), max_acc(max_acc) 
+            KinematicsOptimizer(const double max_vel, const double max_acc) : max_vel(max_vel), max_acc(max_acc)
             {}
 
-            std::pair<double, double> getOptimalKineticParameters(const std::vector<VectorRepresentation>& path) const
+            std::pair<double, double> getOptimalKinematicParameters(const std::vector<Spline>& splines) const
             {
 
-                if (path.size() < 2) return {0.0, 0.0};
-
-                size_t n = path.size();
-                size_t num_dims = path[0].cols();
-
-                Eigen::VectorXd u_eigen = Eigen::VectorXd::LinSpaced(n, 0.0, 1.0);
-                std::vector<double> u(u_eigen.data(), u_eigen.data() + u_eigen.size());
-
-                std::vector<std::vector<double>> p(num_dims, std::vector<double>(n));
-                for (size_t i = 0; i < n; ++i)
-                {
-                    for (size_t j = 0; j < num_dims; ++j)
-                    {
-                        p[j][i] = path[i](j);
-                    }
-                }
-
-                double smoothing = 0.005;
-                std::vector<Spline> splines;
-                splines.reserve(num_dims);
-                for (size_t i = 0; i < num_dims; ++i)
-                {
-                    splines.push_back(splrep(u, p[i], smoothing));
-                }
                 IntegrandParams params{&splines};
 
-                // Setup and Execute GSL Integration
                 gsl_integration_workspace* workspace = gsl_integration_workspace_alloc(200);
                 gsl_function F;
-                F.function = &TimeOptimizer::integrand;
+                F.function = &KinematicsOptimizer::integrand;
                 F.params = &params;
 
                 double distance = 0.0, error = 0.0;
