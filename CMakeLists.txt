@@ -4,6 +4,7 @@ project(SPLINE_PLANNER LANGUAGES CXX Fortran)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -std=legacy -fdefault-real-8")
 
 set(FORTRAN_SOURCES
     fortran_src/curfit.f

@@ -16,7 +16,7 @@ namespace splplanner
 
             size_t resolution;
 
-            static double getT(const double t, const SplineVector& p0, const SplineVector& p1)
+            static double getT(const double t, const VectorRepresentation& p0, const VectorRepresentation& p1)
             {
                 double distance = (p1 - p0).norm();
                 return t + std::max(sqrt(distance), 0.001);
@@ -27,7 +27,7 @@ namespace splplanner
                 return (std::abs(dt) < EPSILON) ? EPSILON : dt;
             }
 
-            std::vector<SplineVector> interpolate(const SplineVector& p0, const SplineVector& p1, const SplineVector& p2, const SplineVector& p3) const
+            std::vector<VectorRepresentation> interpolate(const VectorRepresentation& p0, const VectorRepresentation& p1, const VectorRepresentation& p2, const VectorRepresentation& p3) const
             {
 
                 double t0 = 0.0;
@@ -49,7 +49,7 @@ namespace splplanner
                 Eigen::MatrixXd C = B1.array().colwise() * ((t2 - t.array()) / safeDt(t2 - t1)).array() +
                                     B2.array().colwise() * ((t.array() - t1) / safeDt(t2 - t1)).array();
 
-                std::vector<SplineVector> segment(C.rows());
+                std::vector<VectorRepresentation> segment(C.rows());
                 for (size_t i = 0; i < C.rows(); ++i)
                 {
                     segment[i] = C.row(i);
@@ -64,10 +64,10 @@ namespace splplanner
             CRSGenerator(const size_t resolution) : resolution(resolution)
             {}
 
-            std::vector<SplineVector> getPath(const std::vector<SplineVector>& waypoints) const
+            std::vector<VectorRepresentation> getPath(const std::vector<VectorRepresentation>& waypoints) const
             {
 
-                std::vector<SplineVector> clean_waypoints;
+                std::vector<VectorRepresentation> clean_waypoints;
                 clean_waypoints.push_back(waypoints[0]);
                 for (size_t i = 1; i < waypoints.size(); i++)
                 {
@@ -77,15 +77,15 @@ namespace splplanner
                     }
                 }
 
-                std::vector<SplineVector> points;
+                std::vector<VectorRepresentation> points;
                 points.push_back(clean_waypoints[0]);
                 points.insert(points.end(), clean_waypoints.begin(), clean_waypoints.end());
                 points.push_back(clean_waypoints.back());
 
-                std::vector<SplineVector> path;
+                std::vector<VectorRepresentation> path;
                 for (size_t i = 0; i < points.size() - 3; i++)
                 {
-                    std::vector<SplineVector> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
+                    std::vector<VectorRepresentation> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
                     if (i == points.size() - 4)
                     {
                         path.insert(path.end(), segment.begin(), segment.end());
