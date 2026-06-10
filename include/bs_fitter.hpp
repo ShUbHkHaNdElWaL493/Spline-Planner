@@ -15,7 +15,7 @@ namespace splplanner
 
             double s;
             size_t frequency;
-        
+
         public:
 
             BSFitter(const size_t& frequency, const double& s) : frequency(frequency), s(s)
@@ -50,7 +50,7 @@ namespace splplanner
 
             }
 
-            Trajectory evaluate(const std::vector<Spline>& splines, const double &t) const
+            std::pair<std::vector<double>, Trajectory> evaluate(const std::vector<Spline>& splines, const double &t) const
             {
 
                 double t_inverse_1 = 1.0 / t;
@@ -80,9 +80,9 @@ namespace splplanner
                     jrk[i] = jrk_val;
                 }
 
-                return {pos, vel, acc, jrk};
+                return {u, {pos, vel, acc, jrk}};
 
             }
-        
+
     };
 }

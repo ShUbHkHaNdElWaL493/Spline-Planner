@@ -121,7 +121,7 @@ namespace splplanner
 
             if (ier > 0) throw std::runtime_error("FITPACK splev failed: " + std::to_string(ier));
             return result;
-        
+
         } else 
         {
 
@@ -137,7 +137,7 @@ namespace splplanner
 
             if (ier > 0) throw std::runtime_error("FITPACK spalde failed: " + std::to_string(ier));
             return d[der];
-        
+
         }
 
     }

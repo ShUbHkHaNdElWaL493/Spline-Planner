@@ -59,9 +59,9 @@ namespace splplanner
                 }
 
                 return segment;
-            
+
             }
-        
+
         public:
 
             CRSFitter(const size_t resolution) : resolution(resolution)

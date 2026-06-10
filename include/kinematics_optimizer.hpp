@@ -58,6 +58,6 @@ namespace splplanner
                 return {distance, time};
 
             }
-        
+
     };
 }
