@@ -1,4 +1,8 @@
+.env
+.gitignore
 .vscode
 build
+docker-compose.yaml
+Dockerfile
 resources
 SPLINE_PLANNER

@@ -8,17 +8,17 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     build-essential \
     cmake \
+    gfortran \
+    libboost-system-dev \
+    libboost-thread-dev \
+    libeigen3-dev \
+    libgsl-dev \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN add-apt-repository ppa:sdurobotics/ur-rtde -y \
-    && apt-get update \
-    && apt-get install -y \
-    libboost-system-dev \
-    libboost-thread-dev \
-    libeigen3-dev \
-    libgsl-dev \
+    && apt-get update && apt-get install -y \
     librtde \
     librtde-dev \
     && rm -rf /var/lib/apt/lists/*
