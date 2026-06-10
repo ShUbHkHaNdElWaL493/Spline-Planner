@@ -39,7 +39,7 @@ namespace splplanner
             KinematicsOptimizer(const double max_vel, const double max_acc) : max_vel(max_vel), max_acc(max_acc)
             {}
 
-            std::pair<double, double> getOptimalKinematicParameters(const std::vector<Spline>& splines) const
+            std::pair<double, double> getOptimalKinematicsParameters(const std::vector<Spline>& splines) const
             {
 
                 IntegrandParams params{&splines};

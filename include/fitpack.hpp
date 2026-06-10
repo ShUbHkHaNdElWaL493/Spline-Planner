@@ -52,7 +52,7 @@ namespace splplanner
      * 
      * @return Spline object containing knots and coefficients.
      */
-    inline Spline splrep(const std::vector<double>& x, const std::vector<double>& y, double s, int k = 3)
+    inline Spline splrep(const std::vector<double>& x, const std::vector<double>& y, const double& s, const int& k = 3)
     {
 
         // curfit_ parameters
@@ -73,7 +73,7 @@ namespace splplanner
 
         fitpack::curfit_(
             &iopt, &m, const_cast<double*>(x.data()), const_cast<double*>(y.data()), w.data(),
-            &xb, &xe, &k, &s, &nest, 
+            &xb, &xe, const_cast<int*>(&k), const_cast<double*>(&s), &nest, 
             &n, t.data(), c.data(), &fp, 
             wrk.data(), &lwrk, iwrk.data(), &ier
         );
@@ -97,7 +97,7 @@ namespace splplanner
      * @param der The order of the derivative to compute (default = 0).
      * @return The interpolated value or derivative.
      */
-    inline double splev(const Spline& spline, double u, int der = 0)
+    inline double splev(const Spline& spline, const double& u, const int& der = 0)
     {
 
         if (der < 0) throw std::invalid_argument("Derivative order cannot be negative.");
@@ -116,7 +116,7 @@ namespace splplanner
 
             fitpack::splev_(
                 const_cast<double*>(spline.knots.data()), &n, const_cast<double*>(spline.coeffs.data()), &k,
-                &u, &result, &m, &ier
+                const_cast<double*>(&u), &result, &m, &ier
             );
 
             if (ier > 0) throw std::runtime_error("FITPACK splev failed: " + std::to_string(ier));
@@ -132,7 +132,7 @@ namespace splplanner
 
             fitpack::spalde_(
                 const_cast<double*>(spline.knots.data()), &n, const_cast<double*>(spline.coeffs.data()), &k1,
-                &u, d.data(), &ier
+                const_cast<double*>(&u), d.data(), &ier
             );
 
             if (ier > 0) throw std::runtime_error("FITPACK spalde failed: " + std::to_string(ier));
