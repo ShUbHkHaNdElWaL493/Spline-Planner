@@ -5,7 +5,6 @@
 #pragma once
 #include "fitpack.hpp"
 #include <gsl/gsl_integration.h>
-#include "spline_definitions.hpp"
 
 namespace splplanner
 {

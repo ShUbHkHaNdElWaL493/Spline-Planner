@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -std=legacy -fdefault-real-8")
-
 set(FORTRAN_SOURCES
     fortran_src/curfit.f
     fortran_src/fpader.f
@@ -26,20 +25,17 @@ find_package(Eigen3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(ur_rtde REQUIRED)
 
-add_executable(
-    ${PROJECT_NAME}
-    ${CMAKE_SOURCE_DIR}/src/main.cpp
-    ${FORTRAN_SOURCES}
-)
+add_library(SPL INTERFACE)
+target_include_directories(SPL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(SPL INTERFACE Eigen3::Eigen)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    "${CMAKE_SOURCE_DIR}/include"
-)
+add_library(SPLPLANNER INTERFACE)
+target_include_directories(SPLPLANNER INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(SPLPLANNER INTERFACE SPL GSL::gsl)
 
-target_link_libraries(
-    ${PROJECT_NAME}
-    Eigen3::Eigen
-    gfortran
-    GSL::gsl
-    ur_rtde::rtde
-)
+add_library(SPLEXECUTOR INTERFACE)
+target_include_directories(SPLEXECUTOR INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(SPLEXECUTOR INTERFACE SPL ur_rtde::rtde)
+
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
+target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER)

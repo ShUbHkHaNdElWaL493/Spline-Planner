@@ -8,7 +8,7 @@
 
 #define EPSILON 1e-6
 
-namespace splplanner
+namespace spl
 {
 
     typedef Eigen::RowVectorXd VectorRepresentation;

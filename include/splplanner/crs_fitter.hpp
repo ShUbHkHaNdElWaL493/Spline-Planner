@@ -3,7 +3,7 @@
 */
 
 #pragma once
-#include "spline_definitions.hpp"
+#include "spl/definitions.hpp"
 
 namespace splplanner
 {
@@ -14,7 +14,7 @@ namespace splplanner
 
             size_t resolution;
 
-            static double getT(const double t, const VectorRepresentation& p0, const VectorRepresentation& p1)
+            static double getT(const double t, const spl::VectorRepresentation& p0, const spl::VectorRepresentation& p1)
             {
                 double distance = (p1 - p0).norm();
                 return t + std::max(sqrt(distance), 0.001);
@@ -25,11 +25,11 @@ namespace splplanner
                 return (std::abs(dt) < EPSILON) ? EPSILON : dt;
             }
 
-            std::vector<VectorRepresentation> interpolate(
-                const VectorRepresentation& p0,
-                const VectorRepresentation& p1,
-                const VectorRepresentation& p2,
-                const VectorRepresentation& p3
+            std::vector<spl::VectorRepresentation> interpolate(
+                const spl::VectorRepresentation& p0,
+                const spl::VectorRepresentation& p1,
+                const spl::VectorRepresentation& p2,
+                const spl::VectorRepresentation& p3
             ) const
             {
 
@@ -52,7 +52,7 @@ namespace splplanner
                 Eigen::MatrixXd C = B1.array().colwise() * ((t2 - t.array()) / safeDt(t2 - t1)).array() +
                                     B2.array().colwise() * ((t.array() - t1) / safeDt(t2 - t1)).array();
 
-                std::vector<VectorRepresentation> segment(C.rows());
+                std::vector<spl::VectorRepresentation> segment(C.rows());
                 for (size_t i = 0; i < C.rows(); ++i)
                 {
                     segment[i] = C.row(i);
@@ -67,10 +67,10 @@ namespace splplanner
             CRSFitter(const size_t resolution) : resolution(resolution)
             {}
 
-            std::vector<VectorRepresentation> fitSpline(const std::vector<VectorRepresentation>& waypoints) const
+            std::vector<spl::VectorRepresentation> fitSpline(const std::vector<spl::VectorRepresentation>& waypoints) const
             {
 
-                std::vector<VectorRepresentation> clean_waypoints;
+                std::vector<spl::VectorRepresentation> clean_waypoints;
                 clean_waypoints.push_back(waypoints[0]);
                 for (size_t i = 1; i < waypoints.size(); i++)
                 {
@@ -80,15 +80,15 @@ namespace splplanner
                     }
                 }
 
-                std::vector<VectorRepresentation> points;
+                std::vector<spl::VectorRepresentation> points;
                 points.push_back(clean_waypoints[0]);
                 points.insert(points.end(), clean_waypoints.begin(), clean_waypoints.end());
                 points.push_back(clean_waypoints.back());
 
-                std::vector<VectorRepresentation> path;
+                std::vector<spl::VectorRepresentation> path;
                 for (size_t i = 0; i < points.size() - 3; i++)
                 {
-                    std::vector<VectorRepresentation> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
+                    std::vector<spl::VectorRepresentation> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
                     if (i == points.size() - 4)
                     {
                         path.insert(path.end(), segment.begin(), segment.end());

@@ -4,7 +4,7 @@
 
 #pragma once
 #include "fitpack.hpp"
-#include "spline_definitions.hpp"
+#include "spl/definitions.hpp"
 
 namespace splplanner
 {
@@ -21,7 +21,7 @@ namespace splplanner
             BSFitter(const size_t& frequency, const double& s) : frequency(frequency), s(s)
             {}
 
-            std::vector<Spline> fitSpline(const std::vector<VectorRepresentation>& path) const
+            std::vector<Spline> fitSpline(const std::vector<spl::VectorRepresentation>& path) const
             {
 
                 size_t n = path.size();
@@ -50,7 +50,7 @@ namespace splplanner
 
             }
 
-            std::pair<std::vector<double>, Trajectory> evaluate(const std::vector<Spline>& splines, const double &t) const
+            std::pair<std::vector<double>, spl::Trajectory> evaluate(const std::vector<Spline>& splines, const double &t) const
             {
 
                 double t_inverse_1 = 1.0 / t;
@@ -63,10 +63,10 @@ namespace splplanner
                 u_eigen = u_eigen / t;
                 std::vector<double> u(u_eigen.data(), u_eigen.data() + u_eigen.size());
 
-                std::vector<VectorRepresentation> pos(num_steps), vel(num_steps), acc(num_steps), jrk(num_steps);
+                std::vector<spl::VectorRepresentation> pos(num_steps), vel(num_steps), acc(num_steps), jrk(num_steps);
                 for (size_t i = 0; i < num_steps; ++i)
                 {
-                    VectorRepresentation pos_val(num_dims), vel_val(num_dims), acc_val(num_dims), jrk_val(num_dims);
+                    spl::VectorRepresentation pos_val(num_dims), vel_val(num_dims), acc_val(num_dims), jrk_val(num_dims);
                     for (size_t j = 0; j < num_dims; ++j)
                     {
                         pos_val(j) = splev(splines[j], u[i], 0);
