@@ -31,6 +31,7 @@ namespace splvisualizer
                 }
 
                 size_t num_dims = this->trajectory.pos[0].cols();
+                fprintf(gnuplot_pipe, "set terminal qt size 800, 1200\n");
                 fprintf(gnuplot_pipe, "clear\n");
                 fprintf(gnuplot_pipe, "set multiplot layout %zu,1 title 'gnuplot Visualizer' font ',12'\n", (num_dims == 2 || num_dims == 3) ? num_dims + 1 : num_dims);
 
@@ -97,6 +98,7 @@ namespace splvisualizer
             {
 
                 size_t num_dims = this->trajectory.pos[0].cols();
+                fprintf(gnuplot_pipe, "set terminal qt size 800, 1200\n");
                 fprintf(gnuplot_pipe, "clear\n");
                 fprintf(gnuplot_pipe, "set multiplot layout %zu,1 title 'gnuplot Visualizer' font ',12'\n", (num_dims == 2 || num_dims == 3) ? num_dims + 1 : num_dims);
 
