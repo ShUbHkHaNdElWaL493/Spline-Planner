@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     build-essential \
     cmake \
+    gnuplot \
     gfortran \
     libboost-system-dev \
     libboost-thread-dev \

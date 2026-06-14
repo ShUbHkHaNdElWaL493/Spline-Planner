@@ -60,6 +60,7 @@ namespace splplanner
                 size_t num_dims = splines.size();
 
                 Eigen::VectorXd u_eigen = Eigen::VectorXd::LinSpaced(num_steps, 0.0, t);
+                std::vector<double> u_eigen_vector(u_eigen.data(), u_eigen.data() + u_eigen.size());
                 u_eigen = u_eigen / t;
                 std::vector<double> u(u_eigen.data(), u_eigen.data() + u_eigen.size());
 
@@ -80,7 +81,7 @@ namespace splplanner
                     jrk[i] = jrk_val;
                 }
 
-                return {u, {pos, vel, acc, jrk}};
+                return {u_eigen_vector, {pos, vel, acc, jrk}};
 
             }
 

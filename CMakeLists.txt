@@ -37,5 +37,9 @@ add_library(SPLEXECUTOR INTERFACE)
 target_include_directories(SPLEXECUTOR INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(SPLEXECUTOR INTERFACE SPL ur_rtde::rtde)
 
+add_library(SPLVISUALIZER INTERFACE)
+target_include_directories(SPLVISUALIZER INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(SPLVISUALIZER INTERFACE SPL)
+
 add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER)
+target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER SPLVISUALIZER)
