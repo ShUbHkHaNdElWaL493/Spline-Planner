@@ -4,25 +4,22 @@
 
 #pragma once
 #include <iostream>
-#include "../spl/definitions.hpp"
+#include "visualizer.hpp"
 
 namespace splvisualizer
 {
-    class GnuplotVisualizer
+    class GnuplotVisualizer : Visualizer
     {
 
         private:
 
             FILE* gnuplot_pipe;
-            std::vector<double> u;
-            spl::Trajectory trajectory;
 
         public:
 
             GnuplotVisualizer(const std::pair<std::vector<double>, spl::Trajectory>& path) :
-            gnuplot_pipe(popen("gnuplot -persist", "w")),
-            u(path.first),
-            trajectory(path.second)
+            Visualizer(path),
+            gnuplot_pipe(popen("gnuplot -persist", "w"))
             {
 
                 if (!gnuplot_pipe)
@@ -94,7 +91,7 @@ namespace splvisualizer
                 }
             }
 
-            void visualize(const std::vector<spl::VectorRepresentation>& q, const double& u)
+            void visualize(const std::vector<spl::VectorRepresentation>& q, const double& u) override
             {
 
                 size_t num_dims = this->trajectory.pos[0].cols();
