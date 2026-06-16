@@ -72,7 +72,7 @@ namespace splplanner
 
                 std::vector<spl::VectorRepresentation> clean_waypoints;
                 clean_waypoints.push_back(waypoints[0]);
-                for (size_t i = 1; i < waypoints.size(); i++)
+                for (size_t i = 1; i < waypoints.size(); ++i)
                 {
                     if ((waypoints[i] - waypoints[i - 1]).norm() > EPSILON)
                     {
@@ -86,7 +86,7 @@ namespace splplanner
                 points.push_back(clean_waypoints.back());
 
                 std::vector<spl::VectorRepresentation> path;
-                for (size_t i = 0; i < points.size() - 3; i++)
+                for (size_t i = 0; i < points.size() - 3; ++i)
                 {
                     std::vector<spl::VectorRepresentation> segment = this->interpolate(points[i], points[i + 1], points[i + 2], points[i + 3]);
                     if (i == points.size() - 4)

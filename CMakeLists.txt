@@ -43,4 +43,4 @@ target_include_directories(SPLVISUALIZER INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/i
 target_link_libraries(SPLVISUALIZER INTERFACE SPL)
 
 add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER SPLVISUALIZER)
+target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER SPLEXECUTOR SPLVISUALIZER)
