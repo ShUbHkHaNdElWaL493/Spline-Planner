@@ -90,10 +90,11 @@ namespace splexecutor
                 this->manipulator_model.reset();
             }
 
-            std::vector<spl::VectorRepresentation> getJointPositions(const std::vector<double>& q) const
+            std::vector<spl::VectorRepresentation> getJointPositions() const
             {
 
                 const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
+                std::vector<double> q = this->manipulator_model->getActualQ();
                 std::vector<spl::VectorRepresentation> joint_positions(dh_parameters.dof + 1, spl::VectorRepresentation::Zero(this->num_dims));
 
                 Eigen::Matrix4d T = Eigen::Matrix4d::Identity();

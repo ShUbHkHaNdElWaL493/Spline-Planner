@@ -23,7 +23,7 @@ namespace splvisualizer
             {}
 
             virtual ~Visualizer() = default;
-            virtual void visualize(const std::vector<spl::VectorRepresentation>& q, const double& u) = 0;
+            virtual void visualize(const std::vector<spl::VectorRepresentation>& q) = 0;
 
     };
 }

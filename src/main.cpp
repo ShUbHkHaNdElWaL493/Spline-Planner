@@ -42,6 +42,7 @@ int main()
     file.close();
 
     splvisualizer::GnuplotVisualizer visualizer(path);
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     size_t frequency;
     if (ur_series == "cb3")
@@ -66,7 +67,10 @@ int main()
     executor.executeTrajectory(path.second);
 
     while (true)
-    {}
+    {
+        visualizer.visualize(executor.getJointPositions());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 
     return 0;
 
