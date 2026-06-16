@@ -37,8 +37,8 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "set title 'Dimension %zu vs Time'\n", i + 1);
                     fprintf(gnuplot_pipe, "set xlabel 'Time (s)'\n");
                     fprintf(gnuplot_pipe, "set ylabel 'Dimension %zu'\n", i + 1);
-                    fprintf(gnuplot_pipe, "set xrange [-15.0:15.0]\n");
-                    fprintf(gnuplot_pipe, "set yrange [-15.0:15.0]\n");
+                    fprintf(gnuplot_pipe, "set xrange [0.0:10.0]\n");
+                    fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "plot '-' with lines lw 2 lc rgb 'red' title 'D%zu(t)'\n", i + 1);
                     for (size_t j = 0; j < this->u.size(); ++j)
                     {
@@ -72,8 +72,8 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "set title 'Trajectory'\n");
                     fprintf(gnuplot_pipe, "set xlabel 'X'\n");
                     fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
-                    fprintf(gnuplot_pipe, "set xrange [-15.0:15.0]\n");
-                    fprintf(gnuplot_pipe, "set yrange [-15.0:15.0]\n");
+                    fprintf(gnuplot_pipe, "set xrange [-2.0:2.0]\n");
+                    fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "plot '-' with linespoints lw 4 pt 7 ps 1.5 lc rgb 'black' title 'Links', \\\n");
                     fprintf(gnuplot_pipe, "     '-' with lines lw 2 lc rgb 'magenta' title 'Path'\n");
                     for (const spl::VectorRepresentation& joint_position : q)
@@ -92,9 +92,9 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "set xlabel 'X'\n");
                     fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
                     fprintf(gnuplot_pipe, "set zlabel 'Z'\n");
-                    fprintf(gnuplot_pipe, "set xrange [-15.0:15.0]\n");
-                    fprintf(gnuplot_pipe, "set yrange [-15.0:15.0]\n");
-                    fprintf(gnuplot_pipe, "set zrange [-15.0:15.0]\n");
+                    fprintf(gnuplot_pipe, "set xrange [-2.0:2.0]\n");
+                    fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
+                    fprintf(gnuplot_pipe, "set zrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "splot '-' with linespoints lw 4 pt 7 ps 1.5 lc rgb 'black' title 'Links', \\\n");
                     fprintf(gnuplot_pipe, "      '-' with lines lw 2 lc rgb 'magenta' title 'Path'\n");
                     for (const spl::VectorRepresentation& joint_position : q)
