@@ -63,7 +63,7 @@ namespace splvisualizer
             {
 
                 size_t num_dims = this->trajectory.pos[0].cols();
-                fprintf(gnuplot_pipe, "set title 'Trajectory'\n");
+                fprintf(gnuplot_pipe, "set title 'gnuplot Visualizer' font ',12'\n");
 
                 fprintf(gnuplot_pipe, "set xlabel 'X'\n");
                 fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
