@@ -29,7 +29,6 @@ namespace splvisualizer
 
                 size_t num_dims = this->trajectory.pos[0].cols();
                 fprintf(gnuplot_pipe, "set terminal qt size 800, 1200\n");
-                fprintf(gnuplot_pipe, "clear\n");
                 fprintf(gnuplot_pipe, "set multiplot layout %zu,1 title 'gnuplot Visualizer' font ',12'\n", num_dims);
 
                 for (size_t i = 0; i < num_dims; ++i)
@@ -64,16 +63,15 @@ namespace splvisualizer
             {
 
                 size_t num_dims = this->trajectory.pos[0].cols();
-                fprintf(gnuplot_pipe, "clear\n");
-                fprintf(gnuplot_pipe, "set multiplot layout 1,1 title 'gnuplot Visualizer' font ',12'\n");
+                fprintf(gnuplot_pipe, "set title 'Trajectory'\n");
+
+                fprintf(gnuplot_pipe, "set xlabel 'X'\n");
+                fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
+                fprintf(gnuplot_pipe, "set xrange [-2.0:2.0]\n");
+                fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
 
                 if (num_dims == 2)
                 {
-                    fprintf(gnuplot_pipe, "set title 'Trajectory'\n");
-                    fprintf(gnuplot_pipe, "set xlabel 'X'\n");
-                    fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
-                    fprintf(gnuplot_pipe, "set xrange [-2.0:2.0]\n");
-                    fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "plot '-' with linespoints lw 4 pt 7 ps 1.5 lc rgb 'black' title 'Links', \\\n");
                     fprintf(gnuplot_pipe, "     '-' with lines lw 2 lc rgb 'magenta' title 'Path'\n");
                     for (const spl::VectorRepresentation& joint_position : q)
@@ -88,12 +86,7 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "e\n");
                 } else if (num_dims == 3)
                 {
-                    fprintf(gnuplot_pipe, "set title 'Trajectory'\n");
-                    fprintf(gnuplot_pipe, "set xlabel 'X'\n");
-                    fprintf(gnuplot_pipe, "set ylabel 'Y'\n");
                     fprintf(gnuplot_pipe, "set zlabel 'Z'\n");
-                    fprintf(gnuplot_pipe, "set xrange [-2.0:2.0]\n");
-                    fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "set zrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "splot '-' with linespoints lw 4 pt 7 ps 1.5 lc rgb 'black' title 'Links', \\\n");
                     fprintf(gnuplot_pipe, "      '-' with lines lw 2 lc rgb 'magenta' title 'Path'\n");
@@ -109,7 +102,6 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "e\n");
                 }
 
-                fprintf(gnuplot_pipe, "unset multiplot\n");
                 fflush(gnuplot_pipe);
 
             }

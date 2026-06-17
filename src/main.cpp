@@ -54,7 +54,7 @@ int main()
     file.close();
 
     splvisualizer::GnuplotVisualizer visualizer(path);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
     std::unique_ptr<splexecutor::models::ManipulatorModel> model = std::make_unique<splexecutor::models::SimulatedManipulatorModel>(
         "resources/dh_parameters/" + ur_model + ".csv",
@@ -70,7 +70,7 @@ int main()
     while (true)
     {
         visualizer.visualize(executor.getJointPositions());
-        std::this_thread::sleep_for(std::chrono::microseconds(62500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 
     return 0;
