@@ -53,7 +53,7 @@ namespace splexecutor
             {
 
                 size_t dof = q.size();
-                double lambda = 1e-3;
+                double lambda = EPSILON;
                 Eigen::MatrixXd J = this->getJacobian(q);
                 Eigen::MatrixXd I = Eigen::MatrixXd::Identity(this->num_dims, this->num_dims);
                 Eigen::MatrixXd J_T = J.transpose();
