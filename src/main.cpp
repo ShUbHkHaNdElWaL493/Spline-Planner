@@ -56,6 +56,8 @@ int main()
     splvisualizer::GnuplotVisualizer visualizer(path);
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
+    // splexecutor::models::DHParameters dh_parameters(NUM_DIMS, {0, 0}, {0.3, 0.3}, {0, 0});
+
     std::unique_ptr<splexecutor::models::ManipulatorModel> model = std::make_unique<splexecutor::models::SimulatedManipulatorModel>(
         "resources/dh_parameters/" + ur_model + ".csv",
         std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
