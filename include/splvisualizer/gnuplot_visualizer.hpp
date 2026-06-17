@@ -19,7 +19,7 @@ namespace splvisualizer
 
             GnuplotVisualizer(const std::pair<std::vector<double>, spl::Trajectory>& path) :
             Visualizer(path),
-            gnuplot_pipe(popen("gnuplot -persist", "w"))
+            gnuplot_pipe(popen("gnuplot", "w"))
             {
 
                 if (!gnuplot_pipe)

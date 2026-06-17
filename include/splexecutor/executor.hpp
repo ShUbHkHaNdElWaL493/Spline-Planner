@@ -3,7 +3,6 @@
 */
 
 #pragma once
-#include <atomic>
 #include <mutex>
 #include <queue>
 #include "spl/definitions.hpp"
@@ -31,8 +30,13 @@ namespace splexecutor
                             std::lock_guard<std::mutex> lock(this->state_output_mutex);
                             if (!this->output.empty())
                             {
+                                size_t num_dims = this->output.front().cols();
                                 this->execute(this->output.front());
                                 this->output.pop();
+                                if (this->output.empty())
+                                {
+                                    this->execute(spl::VectorRepresentation::Zero(num_dims));
+                                }
                             }
                         }
                     }

@@ -66,10 +66,11 @@ int main()
     executor.spin();
     executor.executeTrajectory(path.second);
 
+    std::cout << std::endl;
     while (true)
     {
         visualizer.visualize(executor.getJointPositions());
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::microseconds(62500));
     }
 
     return 0;

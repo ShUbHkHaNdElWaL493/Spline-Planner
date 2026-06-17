@@ -16,28 +16,34 @@ namespace splexecutor
 
             private:
 
+                
                 double dt;
                 mutable std::mutex state_mutex;
+                std::atomic<bool> is_running;
                 std::thread sim_thread;
                 std::vector<double> q, qd;
 
                 void loop()
                 {
-                    auto start_time = std::chrono::steady_clock::now();
+                    while (is_running)
                     {
-                        std::lock_guard<std::mutex> lock(state_mutex);
-                        for (size_t i = 0; i < this->dh_parameters.dof; ++i)
+                        auto start_time = std::chrono::steady_clock::now();
                         {
-                            q[i] += qd[i] * dt;
+                            std::lock_guard<std::mutex> lock(state_mutex);
+                            for (size_t i = 0; i < this->dh_parameters.dof; ++i)
+                            {
+                                this->q[i] += this->qd[i] * dt;
+                            }
                         }
+                        std::this_thread::sleep_until(start_time + std::chrono::duration<double>(dt));
                     }
-                    std::this_thread::sleep_until(start_time + std::chrono::duration<double>(dt));
                 }
 
             public:
 
                 SimulatedManipulatorModel(const DHParameters& dh_parameters, const std::vector<double>& initial_q, const size_t& frequency) :
                 ManipulatorModel(dh_parameters),
+                is_running(true),
                 dt(1.0 / frequency),
                 q(initial_q),
                 qd(this->dh_parameters.dof, 0.0)
@@ -52,7 +58,8 @@ namespace splexecutor
 
                 ~SimulatedManipulatorModel() override
                 {
-                    if (sim_thread.joinable()) { sim_thread.join(); }
+                    is_running = false;
+                    sim_thread.join();
                 }
 
                 std::vector<double> getActualQ() const override
@@ -64,7 +71,7 @@ namespace splexecutor
                 void speedJ(const std::vector<double>& joint_velocities) override
                 {
                     std::lock_guard<std::mutex> lock(state_mutex);
-                    qd = joint_velocities;
+                    this->qd = joint_velocities;
                 }
 
         };
