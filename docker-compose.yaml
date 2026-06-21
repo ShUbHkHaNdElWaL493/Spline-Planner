@@ -27,6 +27,8 @@ services:
     environment:
       - ROBOT_MODEL=${UR_MODEL}
   spline_planner:
+    build:
+      context: .
     image: spline_planner
     container_name: spline_planner
     networks:
