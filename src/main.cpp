@@ -11,12 +11,14 @@
 #include "splplanner/planner.hpp"
 #include "splvisualizer/gnuplot_visualizer.hpp"
 #include "splexecutor/models/simulated_manipulator_model.hpp"
+#include "splexecutor/models/ur_manipulator_model.hpp"
 #include "splexecutor/manipulator_executor.hpp"
 #include <stdexcept>
 
 int main()
 {
 
+    const std::string manipulator_model = "sim";
     std::string ur_model = std::getenv("UR_MODEL");
     std::string ur_series = std::getenv("UR_SERIES");
 
@@ -37,14 +39,35 @@ int main()
         std::runtime_error("Invalid UR series.");
     }
 
-    spl::VectorRepresentation p0(NUM_DIMS), p1(NUM_DIMS), p2(NUM_DIMS), p3(NUM_DIMS);
-    p0 << -0.8172, -0.2329, 0.0628;
-    p1 <<     0.1,     0.1,    0.2;
-    p2 <<     0.2,     0.1,    0.2;
-    p3 <<    -0.2,    -0.2,    0.2;
+    splplanner::Planner planner(0.1, 30, frequency);
+    std::unique_ptr<splexecutor::models::ManipulatorModel> model;
 
-    splplanner::Planner planner(2.0, 1.0, frequency);
-    std::pair<std::vector<double>, spl::Trajectory> path = planner.plan({p0, p1, p2, p3});
+    if (manipulator_model == "ur")
+    {
+        // UR Manipulator Model
+        model = std::make_unique<splexecutor::models::URManipulatorModel>(
+            "resources/dh_parameters/" + ur_model + ".csv",
+            "192.168.56.101"
+        );
+    } else if (manipulator_model == "sim")
+    {
+        // Simulated Manipulator Model
+        model = std::make_unique<splexecutor::models::SimulatedManipulatorModel>(
+            "resources/dh_parameters/" + ur_model + ".csv",
+            std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+            frequency
+        );
+    }
+
+    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model);
+    executor.spin();
+
+    std::vector<spl::VectorRepresentation> p(4, spl::VectorRepresentation(NUM_DIMS));
+    p[0] = executor.getInitialQ();
+    p[1] <<  0.4,  0.0,  0.3;
+    p[2] <<  0.1, 0.45, 0.15;
+    p[3] << 0.35, -0.3,  0.5;
+    std::pair<std::vector<double>, spl::Trajectory> path = planner.plan(p);
 
     std::ofstream file("points.txt");
     for (size_t i = 0; i < path.second.pos.size(); i++)
@@ -54,21 +77,10 @@ int main()
     file.close();
 
     splvisualizer::GnuplotVisualizer visualizer(path);
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
-    // splexecutor::models::DHParameters dh_parameters(NUM_DIMS, {0, 0}, {0.3, 0.3}, {0, 0});
-
-    std::unique_ptr<splexecutor::models::ManipulatorModel> model = std::make_unique<splexecutor::models::SimulatedManipulatorModel>(
-        "resources/dh_parameters/" + ur_model + ".csv",
-        std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-        frequency
-    );
-
-    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model);
-    executor.spin();
     executor.executeTrajectory(path.second);
 
-    std::cout << std::endl;
     while (true)
     {
         visualizer.visualize(executor.getJointPositions());

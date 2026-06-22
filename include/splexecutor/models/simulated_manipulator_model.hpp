@@ -51,6 +51,7 @@ namespace splexecutor
 
                 SimulatedManipulatorModel(const std::string& dh_parameters_file, const std::vector<double>& initial_q, const size_t& frequency) :
                 ManipulatorModel(dh_parameters_file),
+                is_running(true),
                 dt(1.0 / frequency),
                 q(initial_q),
                 qd(this->dh_parameters.dof, 0.0)
@@ -62,16 +63,16 @@ namespace splexecutor
                     sim_thread.join();
                 }
 
-                std::vector<double> getActualQ() const override
+                std::vector<double> getActualQ() override
                 {
                     std::lock_guard<std::mutex> lock(state_mutex);
                     return q;
                 }
 
-                void speedJ(const std::vector<double>& joint_velocities) override
+                void speedJ(const std::vector<double>& qd) override
                 {
                     std::lock_guard<std::mutex> lock(state_mutex);
-                    this->qd = joint_velocities;
+                    this->qd = qd;
                 }
 
         };

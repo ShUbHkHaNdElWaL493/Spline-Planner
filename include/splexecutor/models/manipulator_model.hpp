@@ -111,8 +111,9 @@ namespace splexecutor
                 const DHParameters& getDHParameters() const { return this->dh_parameters; }
 
                 virtual ~ManipulatorModel() = default;
-                virtual std::vector<double> getActualQ() const = 0;
-                virtual void speedJ(const std::vector<double>& joint_velocities) = 0;
+                virtual std::vector<double> getActualQ() = 0;
+                virtual void speedJ(const std::vector<double>& qd) = 0;
+
         };
 
     }
