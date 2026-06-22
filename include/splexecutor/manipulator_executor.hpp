@@ -14,6 +14,7 @@ namespace splexecutor
 
         private:
 
+            Eigen::MatrixXd J_initial;
             size_t num_dims;
             std::unique_ptr<models::ManipulatorModel> manipulator_model;
 
@@ -49,7 +50,12 @@ namespace splexecutor
 
             }
 
-            std::vector<double> getQd(const std::vector<double>& q, const spl::VectorRepresentation& x_dot) const
+            std::pair<std::vector<double>, double> getSpeedJParameters(
+                const std::vector<double>& q,
+                const std::vector<double>& qd,
+                const spl::VectorRepresentation& xd,
+                const spl::VectorRepresentation& xdd
+            )
             {
 
                 size_t dof = q.size();
@@ -57,24 +63,34 @@ namespace splexecutor
                 Eigen::MatrixXd J = this->getJacobian(q);
                 Eigen::MatrixXd I = Eigen::MatrixXd::Identity(this->num_dims, this->num_dims);
                 Eigen::MatrixXd J_T = J.transpose();
+                Eigen::MatrixXd J_I = J_T * (J * J_T + (lambda * lambda) * I).inverse();
+                Eigen::MatrixXd J_d = (J - this->J_initial) / dt;
+                this->J_initial = J;
 
-                Eigen::VectorXd x_dot_eigen = x_dot.transpose();
-                Eigen::VectorXd q_dot_eigen = J_T * (J * J_T + (lambda * lambda) * I).inverse() * x_dot_eigen;
-                std::vector<double> joint_velocities(dof);
+                Eigen::VectorXd xd_eigen = xd.transpose();
+                Eigen::VectorXd xdd_eigen = xdd.transpose();
+                Eigen::VectorXd qd_eigen(dof);
+                Eigen::VectorXd q_dot_eigen = J_I * xd_eigen;
+                std::vector<double> q_dot(dof);
                 for (size_t i = 0; i < dof; ++i)
                 {
-                    joint_velocities[i] = q_dot_eigen(i);
+                    qd_eigen(i) = qd[i];
+                    q_dot[i] = q_dot_eigen(i);
                 }
+
+                Eigen::VectorXd q_dot_dot_eigen = J_I * (xdd_eigen - J_d * qd_eigen);
+                double q_dot_dot = q_dot_dot_eigen.maxCoeff();
                 
-                return joint_velocities;
+                return {q_dot, q_dot_dot};
 
             }
 
-            void execute(const spl::VectorRepresentation& out) override
+            void execute(const spl::VectorRepresentation& out_d, const spl::VectorRepresentation& out_dd) override
             {
                 std::vector<double> q = this->manipulator_model->getActualQ();
-                std::vector<double> qd = this->getQd(q, out);
-                this->manipulator_model->speedJ(qd);
+                std::vector<double> qd = this->manipulator_model->getActualQd();
+                std::pair<std::vector<double>, double> speedj_parameters = this->getSpeedJParameters(q, qd, out_d, out_dd);
+                this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
             }
 
         public:
@@ -94,6 +110,7 @@ namespace splexecutor
             {
                 const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
                 std::vector<double> q = this->manipulator_model->getActualQ();
+                this->J_initial = this->getJacobian(q);
                 Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
                 for (size_t i = 0; i < dh_parameters.dof; ++i)
                 {
@@ -129,7 +146,8 @@ namespace splexecutor
                 std::lock_guard<std::mutex> lock(this->state_output_mutex);
                 for (size_t i = 0; i < trajectory.vel.size(); ++i)
                 {
-                    this->output.push(trajectory.vel[i]);
+                    this->output_d.push(trajectory.vel[i]);
+                    this->output_dd.push(trajectory.acc[i]);
                 }
             }
 

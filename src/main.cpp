@@ -18,7 +18,7 @@
 int main()
 {
 
-    const std::string manipulator_model = "sim";
+    const std::string manipulator_model = "ur";
     std::string ur_model = std::getenv("UR_MODEL");
     std::string ur_series = std::getenv("UR_SERIES");
 
@@ -39,7 +39,7 @@ int main()
         std::runtime_error("Invalid UR series.");
     }
 
-    splplanner::Planner planner(0.1, 30, frequency);
+    splplanner::Planner planner(1.0, 0.05, frequency);
     std::unique_ptr<splexecutor::models::ManipulatorModel> model;
 
     if (manipulator_model == "ur")

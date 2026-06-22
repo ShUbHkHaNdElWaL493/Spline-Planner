@@ -15,7 +15,6 @@ namespace splexecutor
 
         private:
 
-            double dt;
             std::atomic<bool> is_running, is_spinning;
             std::thread spin_thread;
 
@@ -28,14 +27,15 @@ namespace splexecutor
                     {
                         {
                             std::lock_guard<std::mutex> lock(this->state_output_mutex);
-                            if (!this->output.empty())
+                            if (!this->output_d.empty())
                             {
-                                size_t num_dims = this->output.front().cols();
-                                this->execute(this->output.front());
-                                this->output.pop();
-                                if (this->output.empty())
+                                size_t num_dims = this->output_d.front().cols();
+                                this->execute(this->output_d.front(), this->output_dd.front());
+                                this->output_d.pop();
+                                this->output_dd.pop();
+                                if (this->output_d.empty())
                                 {
-                                    this->execute(spl::VectorRepresentation::Zero(num_dims));
+                                    this->execute(spl::VectorRepresentation::Zero(num_dims), spl::VectorRepresentation::Zero(num_dims));
                                 }
                             }
                         }
@@ -44,12 +44,14 @@ namespace splexecutor
                 }
             }
             
-            virtual void execute(const spl::VectorRepresentation& out) = 0;
+            virtual void execute(const spl::VectorRepresentation& out_d, const spl::VectorRepresentation& out_dd) = 0;
             
         protected:
 
+            double dt;
             mutable std::mutex state_output_mutex;
-            std::queue<spl::VectorRepresentation> output;
+            std::queue<spl::VectorRepresentation> output_d;
+            std::queue<spl::VectorRepresentation> output_dd;
 
         public:
 

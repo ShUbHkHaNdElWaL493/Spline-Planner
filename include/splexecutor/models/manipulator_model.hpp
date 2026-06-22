@@ -112,7 +112,8 @@ namespace splexecutor
 
                 virtual ~ManipulatorModel() = default;
                 virtual std::vector<double> getActualQ() = 0;
-                virtual void speedJ(const std::vector<double>& qd) = 0;
+                virtual std::vector<double> getActualQd() = 0;
+                virtual void speedJ(const std::vector<double>& qd, const double& accelaration) = 0;
 
         };
 

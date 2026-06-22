@@ -66,9 +66,14 @@ namespace splexecutor
                     return this->rtde_ri->getActualQ();
                 }
 
-                void speedJ(const std::vector<double>& qd) override
+                std::vector<double> getActualQd() override
                 {
-                    this->rtde_ci->speedJ(qd);
+                    return this->rtde_ri->getActualQd();
+                }
+
+                void speedJ(const std::vector<double>& qd, const double& accelaration) override
+                {
+                    this->rtde_ci->speedJ(qd, accelaration);
                 }
 
         };
