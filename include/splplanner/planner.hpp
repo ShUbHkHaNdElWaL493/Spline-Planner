@@ -15,17 +15,9 @@ namespace splplanner
 
         private:
 
-            struct LogEntry
-            {
-                double distance, time;
-                std::vector<double> u;
-                spl::Trajectory trajectory;
-            };
-
             CRSFitter crs_fitter;
             BSFitter bs_fitter;
             KinematicsOptimizer kinematics_optimizer;
-            std::vector<LogEntry> log;
 
         public:
 
@@ -41,15 +33,6 @@ namespace splplanner
                 std::vector<Spline> splines = this->bs_fitter.fitSpline(path);
                 std::pair<double, double> kinematics_params = this->kinematics_optimizer.getOptimalKinematicsParameters(splines);
                 std::pair<std::vector<double>, spl::Trajectory> result = bs_fitter.evaluate(splines, kinematics_params.second);
-                log.push_back({
-                    kinematics_params.first,
-                    kinematics_params.second,
-                    result.first,
-                    result.second.pos,
-                    result.second.vel,
-                    result.second.acc,
-                    result.second.jrk
-                });
                 return result;
             }
 
