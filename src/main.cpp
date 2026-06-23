@@ -3,6 +3,9 @@
 */
 
 #define NUM_DIMS 3
+#define MAX_VEL_PLANNER    1.0
+#define MAX_ACC_PLANNER    0.05
+#define MAX_ACC_EXECUTOR  40.0
 
 #include <cstdlib>
 #include <iostream>
@@ -39,7 +42,7 @@ int main()
         std::runtime_error("Invalid UR series.");
     }
 
-    splplanner::Planner planner(1.0, 0.05, frequency);
+    splplanner::Planner planner(MAX_VEL_PLANNER, MAX_ACC_PLANNER, frequency);
     std::unique_ptr<splexecutor::models::ManipulatorModel> model;
 
     if (manipulator_model == "ur")
@@ -59,7 +62,7 @@ int main()
         );
     }
 
-    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model);
+    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR);
     executor.spin();
 
     std::vector<spl::VectorRepresentation> p(4, spl::VectorRepresentation(NUM_DIMS));

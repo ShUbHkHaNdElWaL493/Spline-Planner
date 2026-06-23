@@ -14,6 +14,7 @@ namespace splexecutor
 
         private:
 
+            double max_acc;
             Eigen::MatrixXd J_initial;
             size_t num_dims;
             std::unique_ptr<models::ManipulatorModel> manipulator_model;
@@ -79,7 +80,8 @@ namespace splexecutor
                 }
 
                 Eigen::VectorXd q_dot_dot_eigen = J_I * (xdd_eigen - J_d * qd_eigen);
-                double q_dot_dot = q_dot_dot_eigen.maxCoeff();
+                double q_dot_dot = q_dot_dot_eigen.cwiseAbs().maxCoeff();
+                q_dot_dot = std::min(q_dot_dot, this->max_acc);
                 
                 return {q_dot, q_dot_dot};
 
@@ -95,8 +97,9 @@ namespace splexecutor
 
         public:
 
-            ManipulatorExecutor(size_t frequency, size_t num_dims, std::unique_ptr<models::ManipulatorModel>& manipulator_model) :
+            ManipulatorExecutor(size_t frequency, size_t num_dims, std::unique_ptr<models::ManipulatorModel>& manipulator_model, const double& max_acc) :
             Executor(frequency),
+            max_acc(max_acc),
             num_dims(num_dims),
             manipulator_model(std::move(manipulator_model))
             {}
