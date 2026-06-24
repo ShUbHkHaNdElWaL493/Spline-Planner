@@ -17,9 +17,7 @@ namespace splvisualizer
 
         public:
 
-            GnuplotVisualizer(const std::pair<std::vector<double>, spl::Trajectory>& path) :
-            Visualizer(path),
-            gnuplot_pipe(popen("gnuplot", "w"))
+            GnuplotVisualizer(const spl::Trajectory& path) : Visualizer(path), gnuplot_pipe(popen("gnuplot", "w"))
             {
 
                 if (!gnuplot_pipe)
@@ -27,7 +25,7 @@ namespace splvisualizer
                     std::cerr << "<ERROR>: Failed to open gnuplot pipe." << std::endl;
                 }
 
-                size_t num_dims = this->trajectory.pos[0].cols();
+                size_t num_dims = this->trajectory[0].pos.cols();
                 fprintf(gnuplot_pipe, "set terminal qt size 800, 1200\n");
                 fprintf(gnuplot_pipe, "set multiplot layout %zu,1 title 'gnuplot Visualizer' font ',12'\n", num_dims);
 
@@ -36,12 +34,12 @@ namespace splvisualizer
                     fprintf(gnuplot_pipe, "set title 'Dimension %zu vs Time'\n", i + 1);
                     fprintf(gnuplot_pipe, "set xlabel 'Time (s)'\n");
                     fprintf(gnuplot_pipe, "set ylabel 'Dimension %zu'\n", i + 1);
-                    fprintf(gnuplot_pipe, "set xrange [0.0:20.0]\n");
+                    fprintf(gnuplot_pipe, "set xrange [0.0:1.0]\n");
                     fprintf(gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(gnuplot_pipe, "plot '-' with lines lw 2 lc rgb 'red' title 'D%zu(t)'\n", i + 1);
-                    for (size_t j = 0; j < this->u.size(); ++j)
+                    for (size_t j = 0; j < this->trajectory.size(); ++j)
                     {
-                        fprintf(gnuplot_pipe, "%f %f\n", this->u[j], this->trajectory.pos[j](i));
+                        fprintf(gnuplot_pipe, "%f %f\n", this->trajectory[j].u, this->trajectory[j].pos(i));
                     }
                     fprintf(gnuplot_pipe, "e\n");
                 }
@@ -62,7 +60,7 @@ namespace splvisualizer
             void visualize(const std::vector<spl::VectorRepresentation>& q) override
             {
 
-                size_t num_dims = this->trajectory.pos[0].cols();
+                size_t num_dims = this->trajectory[0].pos.cols();
                 fprintf(gnuplot_pipe, "set title 'gnuplot Visualizer' font ',12'\n");
 
                 fprintf(gnuplot_pipe, "set xlabel 'X'\n");
@@ -79,9 +77,9 @@ namespace splvisualizer
                         fprintf(gnuplot_pipe, "%f %f\n", joint_position(0), joint_position(1));
                     }
                     fprintf(gnuplot_pipe, "e\n");
-                    for (const spl::VectorRepresentation& position_vector : this->trajectory.pos)
+                    for (const spl::TrajectoryPoint& trajectory_point : this->trajectory)
                     {
-                        fprintf(gnuplot_pipe, "%f %f\n", position_vector(0), position_vector(1));
+                        fprintf(gnuplot_pipe, "%f %f\n", trajectory_point.pos(0), trajectory_point.pos(1));
                     }
                     fprintf(gnuplot_pipe, "e\n");
                 } else if (num_dims == 3)
@@ -95,9 +93,9 @@ namespace splvisualizer
                         fprintf(gnuplot_pipe, "%f %f %f\n", joint_position(0), joint_position(1), joint_position(2));
                     }
                     fprintf(gnuplot_pipe, "e\n");
-                    for (const spl::VectorRepresentation& position_vector : this->trajectory.pos)
+                    for (const spl::TrajectoryPoint& trajectory_point : this->trajectory)
                     {
-                        fprintf(gnuplot_pipe, "%f %f %f\n", position_vector(0), position_vector(1), position_vector(2));
+                        fprintf(gnuplot_pipe, "%f %f %f\n", trajectory_point.pos(0), trajectory_point.pos(1), trajectory_point.pos(2));
                     }
                     fprintf(gnuplot_pipe, "e\n");
                 }

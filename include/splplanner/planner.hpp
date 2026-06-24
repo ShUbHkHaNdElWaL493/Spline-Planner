@@ -27,12 +27,12 @@ namespace splplanner
             kinematics_optimizer(max_vel, max_acc)
             {}
 
-            std::pair<std::vector<double>, spl::Trajectory> plan(const std::vector<spl::VectorRepresentation>& waypoints)
+            spl::Trajectory plan(const std::vector<spl::VectorRepresentation>& waypoints)
             {
                 std::vector<spl::VectorRepresentation> path = this->crs_fitter.fitSpline(waypoints);
                 std::vector<Spline> splines = this->bs_fitter.fitSpline(path);
                 std::pair<double, double> kinematics_params = this->kinematics_optimizer.getOptimalKinematicsParameters(splines);
-                std::pair<std::vector<double>, spl::Trajectory> result = bs_fitter.evaluate(splines, kinematics_params.second);
+                spl::Trajectory result = bs_fitter.evaluate(splines, kinematics_params.second);
                 return result;
             }
 

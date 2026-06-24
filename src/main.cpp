@@ -70,19 +70,19 @@ int main()
     p[1] <<  0.4,  0.0,  0.3;
     p[2] <<  0.1, 0.45, 0.15;
     p[3] << 0.35, -0.3,  0.5;
-    std::pair<std::vector<double>, spl::Trajectory> path = planner.plan(p);
+    spl::Trajectory trajectory = planner.plan(p);
 
     std::ofstream file("points.txt");
-    for (size_t i = 0; i < path.second.pos.size(); i++)
+    for (size_t i = 0; i < trajectory.size(); i++)
     {
-        file << path.second.pos[i] << std::endl;
+        file << trajectory[i].pos << std::endl;
     }
     file.close();
 
-    splvisualizer::GnuplotVisualizer visualizer(path);
+    splvisualizer::GnuplotVisualizer visualizer(trajectory);
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
-    executor.executeTrajectory(path.second);
+    executor.executeTrajectory(trajectory);
 
     while (true)
     {

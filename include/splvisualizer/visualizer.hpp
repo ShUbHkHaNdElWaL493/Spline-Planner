@@ -12,14 +12,11 @@ namespace splvisualizer
 
         protected:
 
-            std::vector<double> u;
             spl::Trajectory trajectory;
 
         public:
 
-            Visualizer(const std::pair<std::vector<double>, spl::Trajectory>& path) :
-            u(path.first),
-            trajectory(path.second)
+            Visualizer(const spl::Trajectory& path) : trajectory(path)
             {}
 
             virtual ~Visualizer() = default;

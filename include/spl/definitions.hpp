@@ -12,18 +12,22 @@ namespace spl
 {
 
     typedef Eigen::RowVectorXd VectorRepresentation;
-
+    
     /**
      * @brief Struct holding the values of the position, velocity, acceleration and jerk.
      * 
-     * @tparam pos Vector holding positions of the subject
-     * @tparam vel Vector holding velocities of the subject
-     * @tparam acc Vector holding accelerations of the subject
-     * @tparam jrk Vector holding jerks of the subject
+     * @tparam u   Spline parameter of the object
+     * @tparam pos Position of the object
+     * @tparam vel Velocity of the object
+     * @tparam acc Acceleration of the object
+     * @tparam jrk Jerk of the object
      */
-    struct Trajectory
+    struct TrajectoryPoint
     {
-        std::vector<VectorRepresentation> pos, vel, acc, jrk;
+        double u;
+        VectorRepresentation pos, vel, acc, jrk;
     };
+
+    typedef std::vector<TrajectoryPoint> Trajectory;
 
 }

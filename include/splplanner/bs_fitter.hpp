@@ -50,7 +50,7 @@ namespace splplanner
 
             }
 
-            std::pair<std::vector<double>, spl::Trajectory> evaluate(const std::vector<Spline>& splines, const double &t) const
+            spl::Trajectory evaluate(const std::vector<Spline>& splines, const double &t) const
             {
 
                 double t_inverse_1 = 1.0 / t;
@@ -60,11 +60,10 @@ namespace splplanner
                 size_t num_dims = splines.size();
 
                 Eigen::VectorXd u_eigen = Eigen::VectorXd::LinSpaced(num_steps, 0.0, t);
-                std::vector<double> u_eigen_vector(u_eigen.data(), u_eigen.data() + u_eigen.size());
-                u_eigen = u_eigen / t;
+                u_eigen = u_eigen * t_inverse_1;
                 std::vector<double> u(u_eigen.data(), u_eigen.data() + u_eigen.size());
 
-                std::vector<spl::VectorRepresentation> pos(num_steps), vel(num_steps), acc(num_steps), jrk(num_steps);
+                spl::Trajectory trajectory(num_steps);
                 for (size_t i = 0; i < num_steps; ++i)
                 {
                     spl::VectorRepresentation pos_val(num_dims), vel_val(num_dims), acc_val(num_dims), jrk_val(num_dims);
@@ -75,13 +74,10 @@ namespace splplanner
                         acc_val(j) = splev(splines[j], u[i], 2) * t_inverse_2;
                         jrk_val(j) = splev(splines[j], u[i], 3) * t_inverse_3;
                     }
-                    pos[i] = pos_val;
-                    vel[i] = vel_val;
-                    acc[i] = acc_val;
-                    jrk[i] = jrk_val;
+                    trajectory[i] = {u[i], pos_val, vel_val, acc_val, jrk_val};
                 }
 
-                return {u_eigen_vector, {pos, vel, acc, jrk}};
+                return trajectory;
 
             }
 
