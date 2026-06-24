@@ -106,7 +106,7 @@ namespace splexecutor
             {
                 std::vector<double> q = this->manipulator_model->getActualQ();
                 std::vector<double> qd = this->manipulator_model->getActualQd();
-                std::pair<std::vector<double>, double> speedj_parameters = this->getSpeedJParameters(q, qd, out, out_d, out_dd, 0.05);
+                std::pair<std::vector<double>, double> speedj_parameters = this->getSpeedJParameters(q, qd, out, out_d, out_dd, 0.8);
                 this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
                 this->output.pop();
                 if (this->output.empty())
