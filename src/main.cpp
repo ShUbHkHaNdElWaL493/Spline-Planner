@@ -73,13 +73,6 @@ int main()
     p[4] <<  0.0, -0.4, 0.3;
     spl::Trajectory trajectory = planner.plan(p);
 
-    std::ofstream file("points.txt");
-    for (size_t i = 0; i < trajectory.size(); i++)
-    {
-        file << trajectory[i].pos << std::endl;
-    }
-    file.close();
-
     splvisualizer::GnuplotVisualizer visualizer(trajectory);
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
