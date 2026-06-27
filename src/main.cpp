@@ -65,11 +65,12 @@ int main()
     splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR);
     executor.spin();
 
-    std::vector<spl::VectorRepresentation> p(4, spl::VectorRepresentation(NUM_DIMS));
+    std::vector<spl::VectorRepresentation> p(5, spl::VectorRepresentation(NUM_DIMS));
     p[0] = executor.getInitialQ();
-    p[1] <<  0.4,  0.0,  0.3;
-    p[2] <<  0.1, 0.45, 0.15;
-    p[3] << 0.35, -0.3,  0.5;
+    p[1] <<  0.4,  0.0, 0.3;
+    p[2] <<  0.0,  0.4, 0.3;
+    p[3] << -0.4,  0.0, 0.3;
+    p[4] <<  0.0, -0.4, 0.3;
     spl::Trajectory trajectory = planner.plan(p);
 
     std::ofstream file("points.txt");

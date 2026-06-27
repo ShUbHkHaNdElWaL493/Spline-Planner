@@ -139,7 +139,12 @@ namespace splexecutor
                 {
                     T = T * dh_parameters.transform(q[i], i);
                 }
-                return T.block<3, 1>(0, 3).transpose();
+                spl::VectorRepresentation q_initial(this->num_dims);
+                for (size_t i = 0; i < this->num_dims; ++i)
+                {
+                    q_initial(i) = T(i, 3);
+                }
+                return q_initial;
             }
 
             std::vector<spl::VectorRepresentation> getJointPositions()
