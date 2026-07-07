@@ -49,7 +49,6 @@ namespace splvisualizer
                     fprintf(this->gnuplot_pipe, "set title 'Dimension %zu vs Time'\n", i + 1);
                     fprintf(this->gnuplot_pipe, "set xlabel 'Time (s)'\n");
                     fprintf(this->gnuplot_pipe, "set ylabel 'Dimension %zu'\n", i + 1);
-                    fprintf(this->gnuplot_pipe, "set xrange [0.0:1.0]\n");
                     fprintf(this->gnuplot_pipe, "set yrange [-2.0:2.0]\n");
                     fprintf(this->gnuplot_pipe, "plot '-' with lines lw 2 lc rgb 'green' title 'Planned D%zu(t)', \\\n", i + 1);
                     fprintf(this->gnuplot_pipe, "     '-' with lines lw 2 lc rgb 'red' title 'Real D%zu(t)'\n", i + 1);
