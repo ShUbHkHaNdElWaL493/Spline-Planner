@@ -4,7 +4,6 @@
 
 #pragma once
 #include "executor.hpp"
-#include <memory>
 #include "models/manipulator_model.hpp"
 
 namespace splexecutor
@@ -22,7 +21,7 @@ namespace splexecutor
             Eigen::MatrixXd getJacobian(const std::vector<double>& q) const
             {
 
-                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
                 Eigen::MatrixXd J = Eigen::MatrixXd::Zero(this->num_dims, dh_parameters.dof);
 
                 std::vector<Eigen::Matrix4d> T_matrices(dh_parameters.dof + 1);
@@ -61,7 +60,7 @@ namespace splexecutor
             )
             {
 
-                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
                 size_t dof = q.size();
                 Eigen::Map<Eigen::VectorXd> q_eigen(q.data(), q.size());
                 Eigen::Map<Eigen::VectorXd> qd_eigen(qd.data(), qd.size());
@@ -102,25 +101,57 @@ namespace splexecutor
 
             }
 
-            void execute(const spl::VectorRepresentation& out, const spl::VectorRepresentation& out_d, const spl::VectorRepresentation& out_dd) override
+            void execute(const spl::TrajectoryPoint& t) override
             {
                 std::vector<double> q = this->manipulator_model->getActualQ();
                 std::vector<double> qd = this->manipulator_model->getActualQd();
-                std::pair<std::vector<double>, double> speedj_parameters = this->getSpeedJParameters(q, qd, out, out_d, out_dd, 0.8);
+                std::pair<std::vector<double>, double> speedj_parameters = this->getSpeedJParameters(
+                    q,
+                    qd,
+                    t.pos,
+                    t.vel,
+                    t.acc,
+                    0.8
+                );
                 this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
-                this->output.pop();
-                if (this->output.empty())
+            }
+
+            void visualize() override
+            {
+
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
+                std::vector<double> q = this->manipulator_model->getActualQ();
+                std::vector<spl::VectorRepresentation> joint_positions(
+                    dh_parameters.dof + 1,
+                    spl::VectorRepresentation::Zero(this->num_dims)
+                );
+
+                Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+                for (size_t i = 0; i < dh_parameters.dof; ++i)
                 {
-                    this->manipulator_model->speedJ(std::vector<double>(q.size(), 0.0), this->max_acc);
+                    T = T * dh_parameters.transform(q[i], i);
+                    for (size_t j = 0; j < this->num_dims; ++j)
+                    {
+                        joint_positions[i + 1](j) = T(j, 3);
+                    }
                 }
+
+                std::lock_guard<std::mutex> lock(this->state_visualizer_mutex);
+                this->visualizer->visualize(this->getTime(), joint_positions);
+
             }
 
         public:
 
-            ManipulatorExecutor(size_t frequency, size_t num_dims, std::unique_ptr<models::ManipulatorModel>& manipulator_model, const double& max_acc) :
-            Executor(frequency),
-            max_acc(max_acc),
-            num_dims(num_dims),
+            ManipulatorExecutor(
+                size_t frequency,
+                size_t num_dims,
+                std::unique_ptr<models::ManipulatorModel>& manipulator_model,
+                const double& max_acc,
+                std::unique_ptr<visualizers::Visualizer> visualizer = nullptr
+            ) :
+            Executor(frequency, std::move(visualizer)),
+            max_acc(max_acc), num_dims(num_dims),
             manipulator_model(std::move(manipulator_model))
             {}
 
@@ -131,7 +162,7 @@ namespace splexecutor
 
             spl::VectorRepresentation getInitialQ()
             {
-                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
                 std::vector<double> q = this->manipulator_model->getActualQ();
                 this->J_initial = this->getJacobian(q);
                 Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
@@ -147,30 +178,9 @@ namespace splexecutor
                 return q_initial;
             }
 
-            std::vector<spl::VectorRepresentation> getJointPositions()
-            {
-
-                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
-                std::vector<double> q = this->manipulator_model->getActualQ();
-                std::vector<spl::VectorRepresentation> joint_positions(dh_parameters.dof + 1, spl::VectorRepresentation::Zero(this->num_dims));
-
-                Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-                for (size_t i = 0; i < dh_parameters.dof; ++i)
-                {
-                    T = T * dh_parameters.transform(q[i], i);
-                    for (size_t j = 0; j < this->num_dims; ++j)
-                    {
-                        joint_positions[i + 1](j) = T(j, 3);
-                    }
-                }
-
-                return joint_positions;
-
-            }
-
             void executeTrajectory(const spl::Trajectory& trajectory)
             {
-                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
                 std::lock_guard<std::mutex> lock(this->state_output_mutex);
                 for (size_t i = 0; i < trajectory.size(); ++i)
                 {

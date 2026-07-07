@@ -16,7 +16,6 @@ namespace splexecutor
 
             private:
 
-                
                 double dt;
                 mutable std::mutex state_mutex;
                 std::atomic<bool> is_running;
@@ -63,25 +62,25 @@ namespace splexecutor
 
                 ~SimulatedManipulatorModel() override
                 {
-                    is_running = false;
+                    this->is_running = false;
                     sim_thread.join();
                 }
 
                 std::vector<double> getActualQ() override
                 {
-                    std::lock_guard<std::mutex> lock(state_mutex);
+                    std::lock_guard<std::mutex> lock(this->state_mutex);
                     return q;
                 }
 
                 std::vector<double> getActualQd() override
                 {
-                    std::lock_guard<std::mutex> lock(state_mutex);
+                    std::lock_guard<std::mutex> lock(this->state_mutex);
                     return qd;
                 }
 
                 void speedJ(const std::vector<double>& qd, const double& accelaration) override
                 {
-                    std::lock_guard<std::mutex> lock(state_mutex);
+                    std::lock_guard<std::mutex> lock(this->state_mutex);
                     for (size_t i = 0; i < this->dh_parameters.dof; i++)
                     {
                         this->qdd[i] = (qd[i] - this->qd[i]) / dt;

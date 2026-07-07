@@ -7,27 +7,24 @@
 #define MAX_ACC_PLANNER    0.05
 #define MAX_ACC_EXECUTOR  40.0
 
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
 #include "spl/definitions.hpp"
 #include "splplanner/planner.hpp"
-#include "splvisualizer/gnuplot_visualizer.hpp"
 #include "splexecutor/models/simulated_manipulator_model.hpp"
 #include "splexecutor/models/ur_manipulator_model.hpp"
 #include "splexecutor/manipulator_executor.hpp"
-#include <stdexcept>
+#include "splexecutor/visualizers/gnuplot_visualizer.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
 
     const std::string manipulator_model = "ur";
+    const std::string model_visualizer = "manipulator";
     std::string ur_model = std::getenv("UR_MODEL");
     std::string ur_series = std::getenv("UR_SERIES");
 
     if (ur_model == "" || ur_series == "")
     {
-        std::runtime_error("Environment variables not set. Check .env file.");
+        throw std::runtime_error("Environment variables not set. Check .env file.");
     }
 
     size_t frequency;
@@ -39,12 +36,10 @@ int main()
         frequency = 500;
     } else
     {
-        std::runtime_error("Invalid UR series.");
+        throw std::runtime_error("Invalid UR series.");
     }
-
-    splplanner::Planner planner(MAX_VEL_PLANNER, MAX_ACC_PLANNER, frequency);
+    
     std::unique_ptr<splexecutor::models::ManipulatorModel> model;
-
     if (manipulator_model == "ur")
     {
         // UR Manipulator Model
@@ -62,9 +57,21 @@ int main()
         );
     }
 
-    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR);
+    std::unique_ptr<splexecutor::visualizers::Visualizer> visualizer;
+    if (model_visualizer == "plot")
+    {
+        // Gnuplot Dimensional Visualizer
+        visualizer = std::make_unique<splexecutor::visualizers::GnuplotDimensionalVisualizer>(NUM_DIMS);
+    } else if (model_visualizer == "manipulator")
+    {
+        // Gnuplot Manipulator Visualizer
+        visualizer = std::make_unique<splexecutor::visualizers::GnuplotManipulatorVisualizer>(NUM_DIMS);
+    }
+
+    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR, std::move(visualizer));
     executor.spin();
 
+    splplanner::Planner planner(MAX_VEL_PLANNER, MAX_ACC_PLANNER, frequency);
     std::vector<spl::VectorRepresentation> p(5, spl::VectorRepresentation(NUM_DIMS));
     p[0] = executor.getInitialQ();
     p[1] <<  0.4,  0.0, 0.3;
@@ -73,15 +80,14 @@ int main()
     p[4] <<  0.0, -0.4, 0.3;
     spl::Trajectory trajectory = planner.plan(p);
 
-    splvisualizer::GnuplotVisualizer visualizer(trajectory);
-    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     executor.executeTrajectory(trajectory);
 
     while (true)
     {
-        visualizer.visualize(executor.getJointPositions());
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        std::cout << "[INFO] Node alive." << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
 
     return 0;
