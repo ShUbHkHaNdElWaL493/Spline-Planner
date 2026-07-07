@@ -42,7 +42,6 @@ namespace splvisualizer
             ) override
             {
                 this->real_trajectory.push_back({timed_joint_positions.first, timed_joint_positions.second.back()});
-                fprintf(this->gnuplot_pipe, "set terminal qt size 800, 1200\n");
                 fprintf(this->gnuplot_pipe, "set multiplot layout %zu,1 title 'Dimensional Plots' font ',12'\n", num_dims);
                 for (size_t i = 0; i < num_dims; ++i)
                 {
