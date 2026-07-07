@@ -74,7 +74,7 @@ namespace splplanner
                         acc_val(j) = splev(splines[j], u[i], 2) * t_inverse_2;
                         jrk_val(j) = splev(splines[j], u[i], 3) * t_inverse_3;
                     }
-                    trajectory[i] = {u[i], pos_val, vel_val, acc_val, jrk_val};
+                    trajectory[i] = {pos_val, vel_val, acc_val, jrk_val};
                 }
 
                 return trajectory;

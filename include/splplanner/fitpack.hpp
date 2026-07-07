@@ -80,7 +80,7 @@ namespace splplanner
 
         if (ier > 0)
         {
-            throw std::runtime_error("FITPACK curfit failed with error code: " + std::to_string(ier));
+            throw std::runtime_error("[ERROR] FITPACK curfit failed with error code: " + std::to_string(ier));
         }
 
         t.resize(n);

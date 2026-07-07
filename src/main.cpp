@@ -12,7 +12,7 @@
 #include "splexecutor/models/simulated_manipulator_model.hpp"
 #include "splexecutor/models/ur_manipulator_model.hpp"
 #include "splexecutor/manipulator_executor.hpp"
-#include "splexecutor/visualizers/gnuplot_visualizer.hpp"
+#include "splvisualizer/gnuplot_visualizer.hpp"
 
 int main(int argc, char **argv)
 {
@@ -57,18 +57,7 @@ int main(int argc, char **argv)
         );
     }
 
-    std::unique_ptr<splexecutor::visualizers::Visualizer> visualizer;
-    if (model_visualizer == "plot")
-    {
-        // Gnuplot Dimensional Visualizer
-        visualizer = std::make_unique<splexecutor::visualizers::GnuplotDimensionalVisualizer>(NUM_DIMS);
-    } else if (model_visualizer == "manipulator")
-    {
-        // Gnuplot Manipulator Visualizer
-        visualizer = std::make_unique<splexecutor::visualizers::GnuplotManipulatorVisualizer>(NUM_DIMS);
-    }
-
-    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR, std::move(visualizer));
+    splexecutor::ManipulatorExecutor executor(frequency, NUM_DIMS, model, MAX_ACC_EXECUTOR);
     executor.spin();
 
     splplanner::Planner planner(MAX_VEL_PLANNER, MAX_ACC_PLANNER, frequency);
@@ -80,14 +69,24 @@ int main(int argc, char **argv)
     p[4] <<  0.0, -0.4, 0.3;
     spl::Trajectory trajectory = planner.plan(p);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::unique_ptr<splvisualizer::Visualizer> visualizer;
+    if (model_visualizer == "plot")
+    {
+        // Gnuplot Dimensional Visualizer
+        visualizer = std::make_unique<splvisualizer::GnuplotDimensionalVisualizer>(NUM_DIMS);
+    } else if (model_visualizer == "manipulator")
+    {
+        // Gnuplot Manipulator Visualizer
+        visualizer = std::make_unique<splvisualizer::GnuplotManipulatorVisualizer>(NUM_DIMS);
+    }
 
     executor.executeTrajectory(trajectory);
 
     while (true)
     {
-        std::cout << "[INFO] Node alive." << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        auto loop_start_time = std::chrono::steady_clock::now();
+        visualizer->visualize(executor.getVisualizerPlannedTrajectory(), executor.getTimedJointPositions());
+        std::this_thread::sleep_until(loop_start_time + std::chrono::milliseconds(30));
     }
 
     return 0;
