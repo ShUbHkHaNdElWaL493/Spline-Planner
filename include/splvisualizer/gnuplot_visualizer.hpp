@@ -19,7 +19,7 @@ namespace splvisualizer
         public:
 
             GnuplotDimensionalVisualizer(const size_t& num_dims) :
-            gnuplot_pipe(popen("gnuplot -persist", "w")),
+            gnuplot_pipe(popen("gnuplot", "w")),
             num_dims(num_dims)
             {
 
@@ -86,7 +86,7 @@ namespace splvisualizer
         public:
 
             GnuplotManipulatorVisualizer(const size_t& num_dims) :
-            gnuplot_pipe(popen("gnuplot -persist", "w")),
+            gnuplot_pipe(popen("gnuplot", "w")),
             num_dims(num_dims)
             {
 

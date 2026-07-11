@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(SPLINE_PLANNER LANGUAGES CXX Fortran)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE DEBUG CACHE STRING "Choose the type of build." FORCE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)

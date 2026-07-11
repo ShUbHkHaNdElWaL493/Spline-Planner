@@ -24,6 +24,7 @@ RUN add-apt-repository ppa:sdurobotics/ur-rtde -y \
     librtde-dev \
     && rm -rf /var/lib/apt/lists/*
 
+ARG BUILD_TYPE
 WORKDIR /spline_planner
 COPY . .
 RUN cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
