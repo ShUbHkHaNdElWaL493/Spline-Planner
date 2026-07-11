@@ -114,7 +114,43 @@ namespace splexecutor
                     0.8
                 );
                 this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
+                this->output.pop();
+                if (this->output.empty())
+                {
+                    this->manipulator_model->speedJ(std::vector<double>(6, 0.0), this->max_acc);
+                }
             }
+
+            #ifndef NDEBUG
+            spl::TrajectoryPoint getTrajectoryPoint() const override
+            {
+
+                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
+                spl::TrajectoryPoint trajectory_point;
+                trajectory_point.pos = spl::VectorRepresentation(this->num_dims);
+                trajectory_point.vel = spl::VectorRepresentation(this->num_dims);
+                trajectory_point.acc = spl::VectorRepresentation(this->num_dims);
+                trajectory_point.jrk = spl::VectorRepresentation(this->num_dims);
+
+                std::vector<double> q = this->manipulator_model->getActualQ();
+                Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+                for (size_t i = 0; i < dh_parameters.dof; ++i)
+                {
+                    T = T * dh_parameters.transform(q[i], i);
+                }
+                for (size_t i = 0; i < this->num_dims; ++i)
+                {
+                    trajectory_point.pos(i) = T(i, 3);
+                }
+
+                std::vector<double> qd = this->manipulator_model->getActualQd();
+                Eigen::Map<Eigen::VectorXd> qd_eigen(qd.data(), qd.size());
+                trajectory_point.vel = (this->getJacobian(q) * qd_eigen).transpose();
+
+                return trajectory_point;
+
+            }
+            #endif
 
         public:
 
@@ -152,10 +188,10 @@ namespace splexecutor
                 return q_initial;
             }
 
-            std::pair<double, std::vector<spl::VectorRepresentation>> getTimedJointPositions()
+            std::vector<spl::VectorRepresentation> getJointPositions()
             {
 
-                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
+                const models::DHParameters dh_parameters = this->manipulator_model->getDHParameters();
                 std::vector<double> q = this->manipulator_model->getActualQ();
                 std::vector<spl::VectorRepresentation> joint_positions(
                     dh_parameters.dof + 1,
@@ -172,13 +208,12 @@ namespace splexecutor
                     }
                 }
 
-                return {this->getTime(), joint_positions};
+                return joint_positions;
 
             }
 
             void executeTrajectory(const spl::Trajectory& trajectory)
             {
-                const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
                 std::lock_guard<std::mutex> lock(this->state_output_mutex);
                 for (size_t i = 0; i < trajectory.size(); ++i)
                 {

@@ -18,6 +18,9 @@ namespace splplanner
             CRSFitter crs_fitter;
             BSFitter bs_fitter;
             KinematicsOptimizer kinematics_optimizer;
+            #ifndef NDEBUG
+            spl::Log log;
+            #endif
 
         public:
 
@@ -32,9 +35,22 @@ namespace splplanner
                 std::vector<spl::VectorRepresentation> path = this->crs_fitter.fitSpline(waypoints);
                 std::vector<Spline> splines = this->bs_fitter.fitSpline(path);
                 std::pair<double, double> kinematics_params = this->kinematics_optimizer.getOptimalKinematicsParameters(splines);
-                spl::Trajectory result = bs_fitter.evaluate(splines, kinematics_params.second);
-                return result;
+                std::pair<std::vector<double>, spl::Trajectory> result = bs_fitter.evaluate(splines, kinematics_params.second);
+                #ifndef NDEBUG
+                for (size_t i = 0; i < result.first.size(); ++i)
+                {
+                    this->log.push_back({result.first[i], result.second[i]});
+                }
+                #endif
+                return result.second;
             }
+
+            #ifndef NDEBUG
+            spl::Log getLog()
+            {
+                return this->log;
+            }
+            #endif
 
     };
 }

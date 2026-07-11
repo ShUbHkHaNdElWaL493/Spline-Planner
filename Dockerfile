@@ -26,7 +26,7 @@ RUN add-apt-repository ppa:sdurobotics/ur-rtde -y \
 
 WORKDIR /spline_planner
 COPY . .
-RUN cmake -B build
+RUN cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN cmake --build build
 
 EXPOSE 3000

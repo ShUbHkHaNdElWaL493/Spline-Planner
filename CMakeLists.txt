@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(SPLINE_PLANNER LANGUAGES CXX Fortran)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE DEBUG CACHE STRING "Choose the type of build." FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -39,4 +43,33 @@ target_include_directories(SPLEXECUTOR INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/inc
 target_link_libraries(SPLEXECUTOR INTERFACE SPL ur_rtde::rtde)
 
 add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC gfortran SPLPLANNER SPLEXECUTOR)
+target_link_libraries(${PROJECT_NAME} PUBLIC SPLPLANNER SPLEXECUTOR)
+
+include(CheckCXXCompilerFlag)
+include(CheckIPOSupported)
+
+check_ipo_supported(RESULT ipo_supported)
+if(ipo_supported)
+    set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+check_cxx_compiler_flag("-ffast-math" COMPILER_SUPPORTS_FAST_MATH)
+
+if(COMPILER_SUPPORTS_MARCH_NATIVE)
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        $<$<COMPILE_LANGUAGE:CXX>:-march=native>
+        $<$<COMPILE_LANGUAGE:Fortran>:-march=native>
+    )
+elseif(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE "/arch:AVX2")
+endif()
+
+if(COMPILER_SUPPORTS_FAST_MATH)
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        $<$<COMPILE_LANGUAGE:CXX>:-ffast-math>
+        $<$<COMPILE_LANGUAGE:Fortran>:-ffast-math>
+    )
+elseif(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE "/fp:fast")
+endif()

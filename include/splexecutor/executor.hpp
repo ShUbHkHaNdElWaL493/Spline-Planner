@@ -16,11 +16,13 @@ namespace splexecutor
 
         private:
 
-        mutable std::mutex state_vpt_mutex;
-        std::atomic<bool> is_running, is_spinning;
+            #ifndef NDEBUG
+            spl::Log log_planning, log_execution;
+            mutable std::mutex state_log_mutex;
+            #endif
+            std::atomic<bool> is_running, is_spinning;
             std::chrono::time_point<std::chrono::steady_clock> spin_start_time;
             std::thread spin_thread;
-            std::vector<std::pair<double, spl::VectorRepresentation>> visualizer_planned_trajectory;
 
             void spinLoop()
             {
@@ -33,12 +35,15 @@ namespace splexecutor
                             std::lock_guard<std::mutex> lock(this->state_output_mutex);
                             if (!this->output.empty())
                             {
-                                this->execute(this->output.front());
+                                #ifndef NDEBUG
                                 {
-                                    std::lock_guard<std::mutex> lock(this->state_vpt_mutex);
-                                    this->visualizer_planned_trajectory.push_back({this->getTime(), this->output.front().pos});
+                                    std::lock_guard<std::mutex> lock(this->state_log_mutex);
+                                    double time = this->getTime();
+                                    this->log_planning.push_back({time, this->output.front()});
+                                    this->log_execution.push_back({time, this->getTrajectoryPoint()});
                                 }
-                                this->output.pop();
+                                #endif
+                                this->execute(this->output.front());
                             }
                         }
                     }
@@ -47,6 +52,10 @@ namespace splexecutor
             }
             
             virtual void execute(const spl::TrajectoryPoint& t) = 0;
+
+            #ifndef NDEBUG
+            virtual spl::TrajectoryPoint getTrajectoryPoint() const = 0;
+            #endif
             
         protected:
 
@@ -54,7 +63,7 @@ namespace splexecutor
             mutable std::mutex state_output_mutex;
             std::queue<spl::TrajectoryPoint> output;
 
-            double getTime()
+            double getTime() const
             {
                 std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - this->spin_start_time;
                 return elapsed.count();
@@ -76,11 +85,13 @@ namespace splexecutor
                 this->spin_thread.join();
             }
 
-            std::vector<std::pair<double, spl::VectorRepresentation>> getVisualizerPlannedTrajectory()
+            #ifndef NDEBUG
+            std::pair<spl::Log, spl::Log> getLog()
             {
-                std::lock_guard<std::mutex> lock(this->state_vpt_mutex);
-                return this->visualizer_planned_trajectory;
+                std::lock_guard<std::mutex> lock(this->state_log_mutex);
+                return {this->log_planning, this->log_execution};
             }
+            #endif
 
             void spin()
             {

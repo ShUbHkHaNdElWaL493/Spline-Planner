@@ -29,6 +29,8 @@ services:
   spline_planner:
     build:
       context: .
+      args:
+      - BUILD_TYPE=${BUILD_TYPE}
     image: spline_planner
     container_name: spline_planner
     networks:

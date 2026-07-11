@@ -68,12 +68,13 @@ int main(int argc, char **argv)
     p[4] <<  0.0, -0.4, 0.3;
     spl::Trajectory trajectory = planner.plan(p);
 
+    std::unique_ptr<splvisualizer::Visualizer> visualizer;
     #ifdef VISUALIZER_GDV
         // Gnuplot Dimensional Visualizer
-        std::unique_ptr<splvisualizer::GnuplotDimensionalVisualizer> visualizer = std::make_unique<splvisualizer::GnuplotDimensionalVisualizer>(NUM_DIMS);
+        visualizer = std::make_unique<splvisualizer::GnuplotDimensionalVisualizer>(NUM_DIMS);
     #elifdef VISUALIZER_GMV
         // Gnuplot Manipulator Visualizer
-        std::unique_ptr<splvisualizer::GnuplotManipulatorVisualizer> visualizer = std::make_unique<splvisualizer::GnuplotManipulatorVisualizer>(NUM_DIMS);
+        visualizer = std::make_unique<splvisualizer::GnuplotManipulatorVisualizer>(NUM_DIMS);
     #endif
 
     executor.executeTrajectory(trajectory);
@@ -81,18 +82,7 @@ int main(int argc, char **argv)
     while (true)
     {
         auto loop_start_time = std::chrono::steady_clock::now();
-        #ifndef NDEBUG
-        std::pair<spl::Log, spl::Log> executor_logs = executor.getLog();
-        #ifdef VISUALIZER_GDV
-        visualizer->visualize(executor_logs.first, executor_logs.second);
-        #elifdef VISUALIZER_GMV
-        visualizer->visualize(executor_logs.first, executor_logs.second, executor.getJointPositions());
-        #endif
-        #else
-        #ifdef VISUALIZER_GMV
-        visualizer->visualize(executor.getJointPositions());
-        #endif
-        #endif
+        visualizer->visualize(executor.getVisualizerPlannedTrajectory(), executor.getVisualizationParameters());
         std::this_thread::sleep_until(loop_start_time + std::chrono::milliseconds(30));
     }
 

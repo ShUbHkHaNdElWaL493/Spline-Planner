@@ -22,7 +22,9 @@ namespace spl
      * @tparam jrk Jerk of the object
      */
     struct TrajectoryPoint { VectorRepresentation pos, vel, acc, jrk; };
-
     typedef std::vector<TrajectoryPoint> Trajectory;
+
+    typedef std::pair<double, spl::TrajectoryPoint> LogEntry;
+    typedef std::vector<LogEntry> Log;
 
 }

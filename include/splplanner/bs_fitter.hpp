@@ -50,7 +50,10 @@ namespace splplanner
 
             }
 
-            spl::Trajectory evaluate(const std::vector<Spline>& splines, const double &t) const
+            std::pair<std::vector<double>, spl::Trajectory> evaluate(
+                const std::vector<Spline>& splines,
+                const double &t
+            ) const
             {
 
                 double t_inverse_1 = 1.0 / t;
@@ -77,7 +80,7 @@ namespace splplanner
                     trajectory[i] = {pos_val, vel_val, acc_val, jrk_val};
                 }
 
-                return trajectory;
+                return {u, trajectory};
 
             }
 
