@@ -54,7 +54,7 @@ namespace splexecutor
             virtual void execute(const spl::TrajectoryPoint& t) = 0;
 
             #ifndef NDEBUG
-            virtual spl::TrajectoryPoint getTrajectoryPoint() const = 0;
+            virtual spl::TrajectoryPoint getTrajectoryPoint() = 0;
             #endif
             
         protected:

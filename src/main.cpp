@@ -9,12 +9,16 @@
 #define MODEL_UR
 #define VISUALIZER_GMV
 
+#include <csignal>
 #include "spl/definitions.hpp"
 #include "splexecutor/manipulator_executor.hpp"
 #include "splexecutor/models/simulated_manipulator_model.hpp"
 #include "splexecutor/models/ur_manipulator_model.hpp"
 #include "splplanner/planner.hpp"
 #include "splvisualizer/gnuplot_visualizer.hpp"
+
+std::atomic<bool> loop = true;
+void stopLoop(int signum) { loop = false; }
 
 int main(int argc, char **argv)
 {
@@ -77,12 +81,14 @@ int main(int argc, char **argv)
     #endif
 
     executor.executeTrajectory(trajectory);
+    std::pair<spl::Log, spl::Log> executor_logs;
+    std::signal(SIGINT, stopLoop);
 
-    while (true)
+    while (loop)
     {
         auto loop_start_time = std::chrono::steady_clock::now();
         #ifndef NDEBUG
-        std::pair<spl::Log, spl::Log> executor_logs = executor.getLog();
+        executor_logs = executor.getLog();
         #ifdef VISUALIZER_GDV
         visualizer->visualize(executor_logs.first, executor_logs.second);
         #elifdef VISUALIZER_GMV
@@ -95,6 +101,82 @@ int main(int argc, char **argv)
         #endif
         std::this_thread::sleep_until(loop_start_time + std::chrono::milliseconds(30));
     }
+
+    #ifndef NDEBUG
+
+    std::ofstream planning_log_file("./log/planning_log.csv");
+    planning_log_file << "time,pos,vel,acc,jrk" << std::endl;
+    for (const spl::LogEntry log_entry : executor_logs.first)
+    {
+        planning_log_file << log_entry.first << ",";
+        planning_log_file << "[";
+        planning_log_file << log_entry.second.pos(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            planning_log_file << ";" << log_entry.second.pos(i);
+        }
+        planning_log_file << "],";
+        planning_log_file << "[";
+        planning_log_file << log_entry.second.vel(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            planning_log_file << ";" << log_entry.second.vel(i);
+        }
+        planning_log_file << "],";
+        planning_log_file << "[";
+        planning_log_file << log_entry.second.acc(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            planning_log_file << ";" << log_entry.second.acc(i);
+        }
+        planning_log_file << "],";
+        planning_log_file << "[";
+        planning_log_file << log_entry.second.jrk(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            planning_log_file << ";" << log_entry.second.jrk(i);
+        }
+        planning_log_file << "]" << std::endl;
+    }
+    planning_log_file.close();
+
+    std::ofstream execution_log_file("./log/execution_log.csv");
+    execution_log_file << "time,pos,vel,acc,jrk" << std::endl;
+    for (const spl::LogEntry log_entry : executor_logs.second)
+    {
+        execution_log_file << log_entry.first << ",";
+        execution_log_file << "[";
+        execution_log_file << log_entry.second.pos(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            execution_log_file << ";" << log_entry.second.pos(i);
+        }
+        execution_log_file << "],";
+        execution_log_file << "[";
+        execution_log_file << log_entry.second.vel(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            execution_log_file << ";" << log_entry.second.vel(i);
+        }
+        execution_log_file << "],";
+        execution_log_file << "[";
+        execution_log_file << log_entry.second.acc(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            execution_log_file << ";" << log_entry.second.acc(i);
+        }
+        execution_log_file << "],";
+        execution_log_file << "[";
+        execution_log_file << log_entry.second.jrk(0);
+        for (size_t i = 1; i < NUM_DIMS; i++)
+        {
+            execution_log_file << ";" << log_entry.second.jrk(i);
+        }
+        execution_log_file << "]" << std::endl;
+    }
+    execution_log_file.close();
+
+    #endif
 
     return 0;
 

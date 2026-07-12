@@ -46,5 +46,6 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XAUTHORITY}:/root/.Xauthority
+      - ./log:/spline_planner/log
     stdin_open: true
     tty: true

@@ -17,6 +17,9 @@ namespace splexecutor
             Eigen::MatrixXd J_initial;
             size_t num_dims;
             std::unique_ptr<models::ManipulatorModel> manipulator_model;
+            #ifndef NDEBUG
+            spl::VectorRepresentation vel_initial, acc_initial;
+            #endif
 
             Eigen::MatrixXd getJacobian(const std::vector<double>& q) const
             {
@@ -118,11 +121,15 @@ namespace splexecutor
                 if (this->output.empty())
                 {
                     this->manipulator_model->speedJ(std::vector<double>(6, 0.0), this->max_acc);
+                    #ifndef NDEBUG
+                    this->vel_initial = spl::VectorRepresentation::Zero(this->num_dims);
+                    this->acc_initial = spl::VectorRepresentation::Zero(this->num_dims);
+                    #endif
                 }
             }
 
             #ifndef NDEBUG
-            spl::TrajectoryPoint getTrajectoryPoint() const override
+            spl::TrajectoryPoint getTrajectoryPoint() override
             {
 
                 const models::DHParameters& dh_parameters = this->manipulator_model->getDHParameters();
@@ -147,6 +154,12 @@ namespace splexecutor
                 Eigen::Map<Eigen::VectorXd> qd_eigen(qd.data(), qd.size());
                 trajectory_point.vel = (this->getJacobian(q) * qd_eigen).transpose();
 
+                trajectory_point.acc = (trajectory_point.vel - this->vel_initial) / this->dt;
+                this->vel_initial = trajectory_point.vel;
+
+                trajectory_point.jrk = (trajectory_point.acc - this->acc_initial) / this->dt;
+                this->acc_initial = trajectory_point.acc;
+
                 return trajectory_point;
 
             }
@@ -163,7 +176,12 @@ namespace splexecutor
             Executor(frequency),
             max_acc(max_acc), num_dims(num_dims),
             manipulator_model(std::move(manipulator_model))
-            {}
+            {
+                #ifndef NDEBUG
+                this->vel_initial = spl::VectorRepresentation::Zero(this->num_dims);
+                this->acc_initial = spl::VectorRepresentation::Zero(this->num_dims);
+                #endif
+            }
 
             ~ManipulatorExecutor() override
             {
