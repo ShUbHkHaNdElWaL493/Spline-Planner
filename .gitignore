@@ -1,4 +1,5 @@
 .vscode
 build
 log
+test
 SPLINE_PLANNER
