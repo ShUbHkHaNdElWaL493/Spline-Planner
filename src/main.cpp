@@ -20,7 +20,7 @@
 std::atomic<bool> loop = true;
 void stopLoop(int signum) { loop = false; }
 
-int main(int argc, char **argv)
+int main()
 {
 
     std::string ur_model = std::getenv("UR_MODEL");
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     if (ur_model == "" || ur_series == "")
     {
-        throw std::runtime_error("Environment variables not set. Check .env file.");
+        throw std::runtime_error("[ERROR] Environment variables not set. Check .env file.");
     }
 
     size_t frequency;
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         frequency = 500;
     } else
     {
-        throw std::runtime_error("Invalid UR series.");
+        throw std::runtime_error("[ERROR] Invalid UR series.");
     }
     
     std::unique_ptr<splexecutor::models::ManipulatorModel> model;
@@ -64,12 +64,16 @@ int main(int argc, char **argv)
     executor.spin();
 
     splplanner::Planner planner(MAX_VEL_PLANNER, MAX_ACC_PLANNER, frequency);
-    std::vector<spl::VectorRepresentation> p(5, spl::VectorRepresentation(NUM_DIMS));
+    std::vector<spl::VectorRepresentation> p(9, spl::VectorRepresentation(NUM_DIMS));
     p[0] = executor.getInitialQ();
     p[1] <<  0.4,  0.0, 0.3;
     p[2] <<  0.0,  0.4, 0.3;
     p[3] << -0.4,  0.0, 0.3;
     p[4] <<  0.0, -0.4, 0.3;
+    p[5] <<  0.0, -0.4, 0.35;
+    p[6] << -0.4,  0.0, 0.35;
+    p[7] <<  0.0,  0.4, 0.35;
+    p[8] <<  0.4,  0.0, 0.35;
     spl::Trajectory trajectory = planner.plan(p);
 
     #ifdef VISUALIZER_GDV
@@ -104,7 +108,7 @@ int main(int argc, char **argv)
 
     #ifndef NDEBUG
 
-    std::ofstream planning_log_file("./log/planning_log.csv");
+    std::ofstream planning_log_file("log/planning_log.csv");
     planning_log_file << "time,pos,vel,acc,jrk" << std::endl;
     for (const spl::LogEntry log_entry : executor_logs.first)
     {
@@ -140,7 +144,7 @@ int main(int argc, char **argv)
     }
     planning_log_file.close();
 
-    std::ofstream execution_log_file("./log/execution_log.csv");
+    std::ofstream execution_log_file("log/execution_log.csv");
     execution_log_file << "time,pos,vel,acc,jrk" << std::endl;
     for (const spl::LogEntry log_entry : executor_logs.second)
     {

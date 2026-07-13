@@ -59,7 +59,8 @@ namespace splexecutor
                 const spl::VectorRepresentation& x,
                 const spl::VectorRepresentation& xd,
                 const spl::VectorRepresentation& xdd,
-                const double &kp
+                const double &kp,
+                const double &kd
             )
             {
 
@@ -89,14 +90,22 @@ namespace splexecutor
                 {
                     x_actual_eigen(i) = T(i, 3);
                 }
-                Eigen::VectorXd q_dot_eigen = J_I * (xd_eigen + kp * (x_eigen - x_actual_eigen));
+
+                Eigen::VectorXd position_error = x_eigen - x_actual_eigen;
+                Eigen::VectorXd velocity_error = xd_eigen - J * qd_eigen;
+
+                Eigen::VectorXd q_dot_eigen = J_I * (xd_eigen + kp * position_error);
                 std::vector<double> q_dot(dof);
                 for (size_t i = 0; i < dof; ++i)
                 {
                     q_dot[i] = q_dot_eigen(i);
                 }
 
-                Eigen::VectorXd q_dot_dot_eigen = J_I * (xdd_eigen - J_d * qd_eigen + kp * (xd_eigen - J * qd_eigen));
+                Eigen::VectorXd q_dot_dot_eigen = J_I * (
+                    xdd_eigen - J_d * qd_eigen
+                    + kp * position_error
+                    + kd * velocity_error
+                );
                 double q_dot_dot = q_dot_dot_eigen.cwiseAbs().maxCoeff();
                 q_dot_dot = std::min(q_dot_dot, this->max_acc);
                 
@@ -114,6 +123,7 @@ namespace splexecutor
                     t.pos,
                     t.vel,
                     t.acc,
+                    0.8,
                     0.8
                 );
                 this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
