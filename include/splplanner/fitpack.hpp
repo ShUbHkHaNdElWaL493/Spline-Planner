@@ -100,7 +100,7 @@ namespace splplanner
     inline double splev(const Spline& spline, const double& u, const int& der = 0)
     {
 
-        if (der < 0) throw std::invalid_argument("Derivative order cannot be negative.");
+        if (der < 0) throw std::invalid_argument("[ERROR] Derivative order cannot be negative.");
         if (der > spline.degree) return 0.0;
 
         int ier = 0;
@@ -119,7 +119,7 @@ namespace splplanner
                 const_cast<double*>(&u), &result, &m, &ier
             );
 
-            if (ier > 0) throw std::runtime_error("FITPACK splev failed: " + std::to_string(ier));
+            if (ier > 0) throw std::runtime_error("[ERROR] FITPACK splev failed: " + std::to_string(ier));
             return result;
 
         } else 
@@ -135,7 +135,7 @@ namespace splplanner
                 const_cast<double*>(&u), d.data(), &ier
             );
 
-            if (ier > 0) throw std::runtime_error("FITPACK spalde failed: " + std::to_string(ier));
+            if (ier > 0) throw std::runtime_error("[ERROR] FITPACK spalde failed: " + std::to_string(ier));
             return d[der];
 
         }

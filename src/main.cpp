@@ -70,10 +70,10 @@ int main()
     p[2] <<  0.0,  0.4, 0.3;
     p[3] << -0.4,  0.0, 0.3;
     p[4] <<  0.0, -0.4, 0.3;
-    p[5] <<  0.0, -0.4, 0.35;
-    p[6] << -0.4,  0.0, 0.35;
-    p[7] <<  0.0,  0.4, 0.35;
-    p[8] <<  0.4,  0.0, 0.35;
+    p[5] <<  0.0, -0.4, 0.4;
+    p[6] << -0.4,  0.0, 0.4;
+    p[7] <<  0.0,  0.4, 0.4;
+    p[8] <<  0.4,  0.0, 0.4;
     spl::Trajectory trajectory = planner.plan(p);
 
     #ifdef VISUALIZER_GDV
@@ -85,8 +85,11 @@ int main()
     #endif
 
     executor.executeTrajectory(trajectory);
-    std::pair<spl::Log, spl::Log> executor_logs;
     std::signal(SIGINT, stopLoop);
+
+    #ifndef NDEBUG
+    std::pair<spl::Log, spl::Log> executor_logs;
+    #endif
 
     while (loop)
     {

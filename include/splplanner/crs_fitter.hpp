@@ -38,24 +38,27 @@ namespace splplanner
                 double t2 = getT(t1, p1, p2);
                 double t3 = getT(t2, p2, p3);
 
-                Eigen::VectorXd t = Eigen::VectorXd::LinSpaced(this->resolution, t1, t2);
+                Eigen::RowVectorXd t = Eigen::RowVectorXd::LinSpaced(this->resolution, t1, t2);
 
-                Eigen::MatrixXd A1 = ((t1 - t.array()) / safeDt(t1 - t0)).matrix() * p0 + ((t.array() - t0) / safeDt(t1 - t0)).matrix() * p1;
-                Eigen::MatrixXd A2 = ((t2 - t.array()) / safeDt(t2 - t1)).matrix() * p1 + ((t.array() - t1) / safeDt(t2 - t1)).matrix() * p2;
-                Eigen::MatrixXd A3 = ((t3 - t.array()) / safeDt(t3 - t2)).matrix() * p2 + ((t.array() - t2) / safeDt(t3 - t2)).matrix() * p3;
+                Eigen::MatrixXd A1 = p0 * ((t1 - t.array()) / safeDt(t1 - t0)).matrix() + 
+                                     p1 * ((t.array() - t0) / safeDt(t1 - t0)).matrix();
+                Eigen::MatrixXd A2 = p1 * ((t2 - t.array()) / safeDt(t2 - t1)).matrix() + 
+                                     p2 * ((t.array() - t1) / safeDt(t2 - t1)).matrix();
+                Eigen::MatrixXd A3 = p2 * ((t3 - t.array()) / safeDt(t3 - t2)).matrix() + 
+                                     p3 * ((t.array() - t2) / safeDt(t3 - t2)).matrix();
 
-                Eigen::MatrixXd B1 = A1.array().colwise() * ((t2 - t.array()) / safeDt(t2 - t0)).array() +
-                                    A2.array().colwise() * ((t.array() - t0) / safeDt(t2 - t0)).array();
-                Eigen::MatrixXd B2 = A2.array().colwise() * ((t3 - t.array()) / safeDt(t3 - t1)).array() +
-                                    A3.array().colwise() * ((t.array() - t1) / safeDt(t3 - t1)).array();
+                Eigen::MatrixXd B1 = A1.array().rowwise() * ((t2 - t.array()) / safeDt(t2 - t0)).array() +
+                                     A2.array().rowwise() * ((t.array() - t0) / safeDt(t2 - t0)).array();
+                Eigen::MatrixXd B2 = A2.array().rowwise() * ((t3 - t.array()) / safeDt(t3 - t1)).array() +
+                                     A3.array().rowwise() * ((t.array() - t1) / safeDt(t3 - t1)).array();
 
-                Eigen::MatrixXd C = B1.array().colwise() * ((t2 - t.array()) / safeDt(t2 - t1)).array() +
-                                    B2.array().colwise() * ((t.array() - t1) / safeDt(t2 - t1)).array();
+                Eigen::MatrixXd C = B1.array().rowwise() * ((t2 - t.array()) / safeDt(t2 - t1)).array() +
+                                    B2.array().rowwise() * ((t.array() - t1) / safeDt(t2 - t1)).array();
 
-                std::vector<spl::VectorRepresentation> segment(C.rows());
-                for (size_t i = 0; i < C.rows(); ++i)
+                std::vector<spl::VectorRepresentation> segment(C.cols());
+                for (size_t i = 0; i < C.cols(); ++i)
                 {
-                    segment[i] = C.row(i);
+                    segment[i] = C.col(i);
                 }
 
                 return segment;

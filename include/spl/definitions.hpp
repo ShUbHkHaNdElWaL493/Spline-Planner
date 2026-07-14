@@ -11,7 +11,7 @@
 namespace spl
 {
 
-    typedef Eigen::RowVectorXd VectorRepresentation;
+    typedef Eigen::VectorXd VectorRepresentation;
     
     /**
      * @brief Struct holding the values of the position, velocity, acceleration and jerk.

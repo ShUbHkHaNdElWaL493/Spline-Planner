@@ -25,7 +25,7 @@ namespace splplanner
             {
 
                 size_t n = path.size();
-                size_t num_dims = path[0].cols();
+                size_t num_dims = path[0].size();
 
                 Eigen::VectorXd u_eigen = Eigen::VectorXd::LinSpaced(n, 0.0, 1.0);
                 std::vector<double> u(u_eigen.data(), u_eigen.data() + u_eigen.size());

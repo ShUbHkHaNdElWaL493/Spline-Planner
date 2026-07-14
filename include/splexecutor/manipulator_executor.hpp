@@ -3,6 +3,9 @@
 */
 
 #pragma once
+#define KP_VEL 0.8
+#define KP_ACC 0.0
+#define KD_ACC 0.8
 #include "executor.hpp"
 #include "models/manipulator_model.hpp"
 
@@ -58,9 +61,7 @@ namespace splexecutor
                 std::vector<double>& qd,
                 const spl::VectorRepresentation& x,
                 const spl::VectorRepresentation& xd,
-                const spl::VectorRepresentation& xdd,
-                const double &kp,
-                const double &kd
+                const spl::VectorRepresentation& xdd
             )
             {
 
@@ -68,11 +69,8 @@ namespace splexecutor
                 size_t dof = q.size();
                 Eigen::Map<Eigen::VectorXd> q_eigen(q.data(), q.size());
                 Eigen::Map<Eigen::VectorXd> qd_eigen(qd.data(), qd.size());
-                Eigen::VectorXd x_eigen = x.transpose();
-                Eigen::VectorXd xd_eigen = xd.transpose();
-                Eigen::VectorXd xdd_eigen = xdd.transpose();
 
-                double lambda = EPSILON;
+                double lambda = EPSILON * 100;
                 Eigen::MatrixXd J = this->getJacobian(q);
                 Eigen::MatrixXd I = Eigen::MatrixXd::Identity(this->num_dims, this->num_dims);
                 Eigen::MatrixXd J_T = J.transpose();
@@ -91,10 +89,10 @@ namespace splexecutor
                     x_actual_eigen(i) = T(i, 3);
                 }
 
-                Eigen::VectorXd position_error = x_eigen - x_actual_eigen;
-                Eigen::VectorXd velocity_error = xd_eigen - J * qd_eigen;
+                Eigen::VectorXd position_error = x - x_actual_eigen;
+                Eigen::VectorXd velocity_error = xd - J * qd_eigen;
 
-                Eigen::VectorXd q_dot_eigen = J_I * (xd_eigen + kp * position_error);
+                Eigen::VectorXd q_dot_eigen = J_I * (xd + KP_VEL * position_error);
                 std::vector<double> q_dot(dof);
                 for (size_t i = 0; i < dof; ++i)
                 {
@@ -102,9 +100,9 @@ namespace splexecutor
                 }
 
                 Eigen::VectorXd q_dot_dot_eigen = J_I * (
-                    xdd_eigen - J_d * qd_eigen
-                    + kp * position_error
-                    + kd * velocity_error
+                    xdd - J_d * qd_eigen
+                    + KP_ACC * position_error
+                    + KD_ACC * velocity_error
                 );
                 double q_dot_dot = q_dot_dot_eigen.cwiseAbs().maxCoeff();
                 q_dot_dot = std::min(q_dot_dot, this->max_acc);
@@ -122,9 +120,7 @@ namespace splexecutor
                     qd,
                     t.pos,
                     t.vel,
-                    t.acc,
-                    0.8,
-                    0.8
+                    t.acc
                 );
                 this->manipulator_model->speedJ(speedj_parameters.first, speedj_parameters.second);
                 this->output.pop();
@@ -162,7 +158,7 @@ namespace splexecutor
 
                 std::vector<double> qd = this->manipulator_model->getActualQd();
                 Eigen::Map<Eigen::VectorXd> qd_eigen(qd.data(), qd.size());
-                trajectory_point.vel = (this->getJacobian(q) * qd_eigen).transpose();
+                trajectory_point.vel = (this->getJacobian(q) * qd_eigen);
 
                 trajectory_point.acc = (trajectory_point.vel - this->vel_initial) / this->dt;
                 this->vel_initial = trajectory_point.vel;
