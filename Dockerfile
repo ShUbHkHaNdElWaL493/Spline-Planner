@@ -31,4 +31,4 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN cmake --build build
 
 EXPOSE 3000
-CMD ["/bin/bash"]
+CMD ["bash"]
