@@ -4,4 +4,4 @@
 build
 docker-compose.yaml
 Dockerfile
-SPLINE_PLANNER
+spline_planner
