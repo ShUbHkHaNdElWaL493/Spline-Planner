@@ -20,22 +20,22 @@ The following steps need to be performed:
     ```
     xhost +local:docker
     ```
-1. Clone the project repository.
+2. Clone the project repository.
     ```
     git clone https://github.com/ShUbHkHaNdElWaL493/Spline-Planner.git spline_planner
     cd spline_planner
     ```
-2. Check the `.env` file to ensure the parameters match the target parameters.
+3. Check the `.env` file to ensure the parameters match the target parameters.
     ```
     BUILD_TYPE=Debug # Debug, Release
     UR_SERIES=e-series # cb3, e-series
     UR_MODEL=UR5e # UR3, UR3e, UR5, UR5e, UR10, UR10e, UR20, UR30
     ```
-3. Start up the containers. Wait for the URSim container to finish setting up.
+4. Start up the containers. Wait for the URSim container to finish setting up.
     ```
     docker compose up --build -d
     ```
-4. Run the `spline_planner` program. Currently, it uses predefined points but they can be changed.
+5. Run the `spline_planner` program. Currently, it uses predefined points but they can be changed.
     ```
     docker exec -it spline_planner ./spline_planner
     ```
