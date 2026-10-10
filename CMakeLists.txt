@@ -7,7 +7,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -std=legacy -fdefault-real-8")
@@ -30,15 +29,6 @@ set(FORTRAN_SOURCES
 find_package(Eigen3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(ur_rtde REQUIRED)
-
-# find_program(CLANG_TIDY_EXEC NAMES "clang-tidy")
-
-# if(CLANG_TIDY_EXEC)
-#     message(STATUS "clang-tidy found: ${CLANG_TIDY_EXEC}")
-#     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXEC}")
-# else()
-#     message(WARNING "clang-tidy not found.")
-# endif()
 
 add_library(SPL INTERFACE)
 target_include_directories(SPL INTERFACE include)

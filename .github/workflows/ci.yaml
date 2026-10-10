@@ -15,4 +15,13 @@ jobs:
       uses: actions/checkout@v6
 
     - name: Build Docker container
-      run: docker build -t spline_planner .
+      run: docker compose up spline-planner-dev --build -d
+    
+    - name: Check CPP code formatting
+      run: docker exec spline-planner-dev bash -c "
+          find . -type f \( -name "*.cpp" -o -name "*.hpp" \) -exec clang-format --dry-run -Werror {} +
+        "
+
+    - name: Clean up container
+      if: always()
+      run: docker compose down
