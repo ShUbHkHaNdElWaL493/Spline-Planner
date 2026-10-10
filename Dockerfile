@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     build-essential \
-    clang-tidy \
+    clang-format \
     cmake \
     gnuplot \
     gfortran \

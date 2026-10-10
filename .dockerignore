@@ -1,7 +1,8 @@
 .env
 .gitignore
 .vscode
-build
+build-debug
+build-release
 docker-compose.yaml
 Dockerfile
 README.md
