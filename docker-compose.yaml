@@ -1,5 +1,6 @@
 networks:
   net:
+    name: spline-planner-net
     driver: bridge
     ipam:
       config:
@@ -9,6 +10,9 @@ services:
   ursim:
     image: universalrobots/ursim_${UR_SERIES}
     container_name: ursim
+    profiles:
+      - dev
+      - prod
     networks:
       net:
         ipv4_address: 192.168.56.101
@@ -26,13 +30,14 @@ services:
     tty: true
     environment:
       - ROBOT_MODEL=${UR_MODEL}
-  spline_planner:
+  spline-planner-dev:
     build:
       context: .
-      args:
-      - BUILD_TYPE=${BUILD_TYPE}
-    image: spline_planner
-    container_name: spline_planner
+      target: spline-planner-dev
+    image: spline-planner
+    container_name: spline-planner
+    profiles:
+      - dev
     networks:
       net:
         ipv4_address: 192.168.56.64
@@ -47,5 +52,28 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XAUTHORITY}:/root/.Xauthority
       - ./log:/spline_planner/log
+    stdin_open: true
+    tty: true
+  spline-planner-prod:
+    build:
+      context: .
+      target: spline-planner-prod
+    image: spline-planner
+    container_name: spline-planner
+    profiles:
+      - prod
+    networks:
+      net:
+        ipv4_address: 192.168.56.64
+    privileged: true
+    ipc: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - UR_MODEL=${UR_MODEL}
+      - UR_SERIES=${UR_SERIES}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY}:/root/.Xauthority
     stdin_open: true
     tty: true

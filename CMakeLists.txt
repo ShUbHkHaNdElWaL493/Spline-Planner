@@ -7,6 +7,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -std=legacy -fdefault-real-8")
@@ -30,19 +31,32 @@ find_package(Eigen3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(ur_rtde REQUIRED)
 
+# find_program(CLANG_TIDY_EXEC NAMES "clang-tidy")
+
+# if(CLANG_TIDY_EXEC)
+#     message(STATUS "clang-tidy found: ${CLANG_TIDY_EXEC}")
+#     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXEC}")
+# else()
+#     message(WARNING "clang-tidy not found.")
+# endif()
+
 add_library(SPL INTERFACE)
-target_include_directories(SPL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPL INTERFACE include)
 target_link_libraries(SPL INTERFACE Eigen3::Eigen)
 
 add_library(SPLPLANNER INTERFACE)
-target_include_directories(SPLPLANNER INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPLPLANNER INTERFACE include)
 target_link_libraries(SPLPLANNER INTERFACE SPL GSL::gsl)
 
 add_library(SPLEXECUTOR INTERFACE)
-target_include_directories(SPLEXECUTOR INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPLEXECUTOR INTERFACE include)
 target_link_libraries(SPLEXECUTOR INTERFACE SPL ur_rtde::rtde)
 
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
+add_executable(${PROJECT_NAME} src/main.cpp ${FORTRAN_SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    OUTPUT_NAME_DEBUG "${PROJECT_NAME}_debug"
+    OUTPUT_NAME_RELEASE "${PROJECT_NAME}"
+)
 target_link_libraries(${PROJECT_NAME} PUBLIC SPLPLANNER SPLEXECUTOR)
 
 include(CheckCXXCompilerFlag)
