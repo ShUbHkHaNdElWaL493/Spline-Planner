@@ -25,4 +25,4 @@ jobs:
 
     - name: Clean up container
       if: always()
-      run: docker compose down
+      run: docker compose rm -s -f spline-planner-dev && docker network prune

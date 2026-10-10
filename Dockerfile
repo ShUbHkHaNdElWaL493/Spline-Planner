@@ -57,6 +57,10 @@ RUN add-apt-repository ppa:sdurobotics/ur-rtde -y \
     librtde-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=spline-planner-build /spline_planner/spline_planner /spline_planner
+WORKDIR /spline_planner
+
+COPY resources resources
+
+COPY --from=spline-planner-build /spline_planner/spline_planner /spline_planner/spline_planner
 
 CMD ["bash"]
