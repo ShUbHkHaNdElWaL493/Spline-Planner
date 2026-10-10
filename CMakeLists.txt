@@ -31,18 +31,22 @@ find_package(GSL REQUIRED)
 find_package(ur_rtde REQUIRED)
 
 add_library(SPL INTERFACE)
-target_include_directories(SPL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPL INTERFACE include)
 target_link_libraries(SPL INTERFACE Eigen3::Eigen)
 
 add_library(SPLPLANNER INTERFACE)
-target_include_directories(SPLPLANNER INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPLPLANNER INTERFACE include)
 target_link_libraries(SPLPLANNER INTERFACE SPL GSL::gsl)
 
 add_library(SPLEXECUTOR INTERFACE)
-target_include_directories(SPLEXECUTOR INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(SPLEXECUTOR INTERFACE include)
 target_link_libraries(SPLEXECUTOR INTERFACE SPL ur_rtde::rtde)
 
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp ${FORTRAN_SOURCES})
+add_executable(${PROJECT_NAME} src/main.cpp ${FORTRAN_SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    OUTPUT_NAME_DEBUG "${PROJECT_NAME}_debug"
+    OUTPUT_NAME_RELEASE "${PROJECT_NAME}"
+)
 target_link_libraries(${PROJECT_NAME} PUBLIC SPLPLANNER SPLEXECUTOR)
 
 include(CheckCXXCompilerFlag)

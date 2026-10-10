@@ -3,90 +3,84 @@
 */
 
 #pragma once
-#include "manipulator_model.hpp"
 #include <mutex>
 #include <thread>
 
-namespace splexecutor
-{
-    namespace models
-    {
-        class SimulatedManipulatorModel : public ManipulatorModel
-        {
+#include "manipulator_model.hpp"
 
-            private:
+namespace splexecutor {
+namespace models {
+class SimulatedManipulatorModel : public ManipulatorModel {
+ private:
+  double dt;
+  mutable std::mutex state_mutex;
+  std::atomic<bool> is_running;
+  std::thread sim_thread;
+  std::vector<double> q, qd, qdd;
 
-                double dt;
-                mutable std::mutex state_mutex;
-                std::atomic<bool> is_running;
-                std::thread sim_thread;
-                std::vector<double> q, qd, qdd;
-
-                void loop()
-                {
-                    while (is_running)
-                    {
-                        auto start_time = std::chrono::steady_clock::now();
-                        {
-                            std::lock_guard<std::mutex> lock(state_mutex);
-                            for (size_t i = 0; i < this->dh_parameters.dof; ++i)
-                            {
-                                this->q[i] += this->qd[i] * dt + 0.5 * this->qdd[i] * dt * dt;
-                                this->qd[i] += this->qdd[i] * dt;
-                                this->qdd[i] = 0.0;
-                            }
-                        }
-                        std::this_thread::sleep_until(start_time + std::chrono::duration<double>(dt));
-                    }
-                }
-
-            public:
-
-                SimulatedManipulatorModel(const DHParameters& dh_parameters, const std::vector<double>& initial_q, const size_t& frequency) :
-                ManipulatorModel(dh_parameters),
-                is_running(true),
-                dt(1.0 / frequency),
-                q(initial_q),
-                qd(this->dh_parameters.dof, 0.0),
-                qdd(this->dh_parameters.dof, 0.0)
-                { sim_thread = std::thread(&SimulatedManipulatorModel::loop, this); }
-
-                SimulatedManipulatorModel(const std::string& dh_parameters_file, const std::vector<double>& initial_q, const size_t& frequency) :
-                ManipulatorModel(dh_parameters_file),
-                is_running(true),
-                dt(1.0 / frequency),
-                q(initial_q),
-                qd(this->dh_parameters.dof, 0.0),
-                qdd(this->dh_parameters.dof, 0.0)
-                { sim_thread = std::thread(&SimulatedManipulatorModel::loop, this); }
-
-                ~SimulatedManipulatorModel() override
-                {
-                    this->is_running = false;
-                    sim_thread.join();
-                }
-
-                std::vector<double> getActualQ() override
-                {
-                    std::lock_guard<std::mutex> lock(this->state_mutex);
-                    return q;
-                }
-
-                std::vector<double> getActualQd() override
-                {
-                    std::lock_guard<std::mutex> lock(this->state_mutex);
-                    return qd;
-                }
-
-                void speedJ(const std::vector<double>& qd, const double& accelaration) override
-                {
-                    std::lock_guard<std::mutex> lock(this->state_mutex);
-                    for (size_t i = 0; i < this->dh_parameters.dof; i++)
-                    {
-                        this->qdd[i] = (qd[i] - this->qd[i]) / dt;
-                    }
-                }
-
-        };
+  void loop() {
+    while (is_running) {
+      auto start_time = std::chrono::steady_clock::now();
+      {
+        std::lock_guard<std::mutex> lock(state_mutex);
+        for (size_t i = 0; i < this->dh_parameters.dof; ++i) {
+          this->q[i] += this->qd[i] * dt + 0.5 * this->qdd[i] * dt * dt;
+          this->qd[i] += this->qdd[i] * dt;
+          this->qdd[i] = 0.0;
+        }
+      }
+      std::this_thread::sleep_until(start_time +
+                                    std::chrono::duration<double>(dt));
     }
-}
+  }
+
+ public:
+  SimulatedManipulatorModel(const DHParameters& dh_parameters,
+                            const std::vector<double>& initial_q,
+                            const size_t& frequency)
+      : ManipulatorModel(dh_parameters),
+        is_running(true),
+        dt(1.0 / frequency),
+        q(initial_q),
+        qd(this->dh_parameters.dof, 0.0),
+        qdd(this->dh_parameters.dof, 0.0) {
+    sim_thread = std::thread(&SimulatedManipulatorModel::loop, this);
+  }
+
+  SimulatedManipulatorModel(const std::string& dh_parameters_file,
+                            const std::vector<double>& initial_q,
+                            const size_t& frequency)
+      : ManipulatorModel(dh_parameters_file),
+        is_running(true),
+        dt(1.0 / frequency),
+        q(initial_q),
+        qd(this->dh_parameters.dof, 0.0),
+        qdd(this->dh_parameters.dof, 0.0) {
+    sim_thread = std::thread(&SimulatedManipulatorModel::loop, this);
+  }
+
+  ~SimulatedManipulatorModel() override {
+    this->is_running = false;
+    sim_thread.join();
+  }
+
+  std::vector<double> getActualQ() override {
+    std::lock_guard<std::mutex> lock(this->state_mutex);
+    return q;
+  }
+
+  std::vector<double> getActualQd() override {
+    std::lock_guard<std::mutex> lock(this->state_mutex);
+    return qd;
+  }
+
+  void speedJ(const std::vector<double>& qd,
+              const double& accelaration) override {
+    std::lock_guard<std::mutex> lock(this->state_mutex);
+    for (size_t i = 0; i < this->dh_parameters.dof; i++) {
+      this->qdd[i] = (qd[i] - this->qd[i]) / dt;
+    }
+  }
+};
+}  // namespace models
+}  // namespace splexecutor
